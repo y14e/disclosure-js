@@ -1,6 +1,6 @@
 class Disclosure {
   rootElement: HTMLElement;
-  detailsElements: NodeListOf<HTMLElement>;
+  detailsElements: NodeListOf<HTMLDetailsElement>;
   summaryElements: NodeListOf<HTMLElement>;
   contentElements: NodeListOf<HTMLElement>;
 
@@ -32,7 +32,7 @@ class Disclosure {
     return element.getAttribute('aria-disabled') !== 'true' && !element.hasAttribute('disabled');
   }
 
-  private toggle(details: HTMLElement, isOpen: boolean): void {
+  private toggle(details: HTMLDetailsElement, isOpen: boolean): void {
     if (isOpen) {
       details.setAttribute('open', '');
     } else {
@@ -62,12 +62,12 @@ class Disclosure {
     focusables[newIndex].focus();
   }
 
-  open(details: HTMLElement): void {
+  open(details: HTMLDetailsElement): void {
     if (details.hasAttribute('open')) return;
     this.toggle(details, true);
   }
 
-  close(details: HTMLElement): void {
+  close(details: HTMLDetailsElement): void {
     if (!details.hasAttribute('open')) return;
     this.toggle(details, false);
   }

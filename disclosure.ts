@@ -9,7 +9,7 @@ class Disclosure {
   rootElements: HTMLElement;
   defaults: DisclosureOptions;
   settings: DisclosureOptions;
-  detailsElements: NodeListOf<HTMLElement>;
+  detailsElements: NodeListOf<HTMLDetailsElement>;
   summaryElements: NodeListOf<HTMLElement>;
   contentElements: NodeListOf<HTMLElement>;
   animations!: (Animation | null)[];
@@ -60,11 +60,11 @@ class Disclosure {
     return element.getAttribute('aria-disabled') !== 'true' && !element.hasAttribute('disabled');
   }
 
-  private toggle(details: HTMLElement, isOpen: boolean): void {
+  private toggle(details: HTMLDetailsElement, isOpen: boolean): void {
     let name = details.getAttribute('data-disclosure-name');
     if (name) {
       details.removeAttribute('name');
-      let opened = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`) as HTMLElement;
+      let opened = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`) as HTMLDetailsElement;
       if (isOpen && opened && opened !== details) this.close(opened);
     }
     window.requestAnimationFrame(() => details.setAttribute('data-disclosure-open', String(isOpen)));
@@ -87,7 +87,7 @@ class Disclosure {
 
   private handleSummaryClick(event: MouseEvent): void {
     event.preventDefault();
-    let details = (event.currentTarget as HTMLElement).parentElement!;
+    let details = (event.currentTarget as HTMLDetailsElement).parentElement as HTMLDetailsElement;
     this.toggle(details, details.getAttribute('data-disclosure-open') !== 'true');
   }
 
@@ -113,12 +113,12 @@ class Disclosure {
     focusables[newIndex].focus();
   }
 
-  open(details: HTMLElement): void {
+  open(details: HTMLDetailsElement): void {
     if (details.getAttribute('data-disclosure-open') === 'true') return;
     this.toggle(details, true);
   }
 
-  close(details: HTMLElement): void {
+  close(details: HTMLDetailsElement): void {
     if (details.getAttribute('data-disclosure-open') === 'false') return;
     this.toggle(details, false);
   }
