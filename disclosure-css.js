@@ -6,6 +6,7 @@ class Disclosure {
     this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
+    this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
     this.initialize();
   }
 
@@ -15,7 +16,7 @@ class Disclosure {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('keydown', event => this.handleSummaryKeyDown(event));
+      summary.addEventListener('keydown', this.handleSummaryKeyDown);
     });
     this.contentElements.forEach(content => {
       if (!this.isFocusable(content.parentElement)) content.setAttribute('hidden', '');
