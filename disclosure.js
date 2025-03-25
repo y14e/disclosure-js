@@ -55,7 +55,7 @@ class Disclosure {
       if (isOpen && opened && opened !== details) this.close(opened);
     }
     window.requestAnimationFrame(() => details.setAttribute('data-disclosure-open', String(isOpen)));
-    let height = `${details.offsetHeight}px`;
+    let blockSize = window.getComputedStyle(details).getPropertyValue('block-size');
     if (isOpen) details.setAttribute('open', '');
     details.style.setProperty('overflow', 'clip');
     let index = [...this.detailsElements].indexOf(details);
@@ -63,12 +63,12 @@ class Disclosure {
     if (animation) animation.cancel();
     let content = details.querySelector('summary + *');
     content.removeAttribute('hidden');
-    animation = this.animations[index] = details.animate({ height: [height, `${details.querySelector('summary').scrollHeight + (isOpen ? content.scrollHeight : 0)}px`] }, { duration: this.settings.animation.duration, easing: this.settings.animation.easing });
+    animation = this.animations[index] = details.animate({ blockSize: [blockSize, `${parseInt(window.getComputedStyle(details.querySelector('summary')).getPropertyValue('block-size')) + (isOpen ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`] }, { duration: this.settings.animation.duration, easing: this.settings.animation.easing });
     animation.addEventListener('finish', () => {
       this.animations[index] = null;
       if (name) details.setAttribute('name', details.getAttribute('data-disclosure-name'));
       if (!isOpen) details.removeAttribute('open');
-      ['height', 'overflow'].forEach(name => details.style.removeProperty(name));
+      ['block-size', 'overflow'].forEach(name => details.style.removeProperty(name));
     });
   }
 
