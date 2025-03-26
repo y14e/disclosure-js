@@ -6,13 +6,13 @@ type DisclosureOptions = {
 };
 
 class Disclosure {
-  rootElements: HTMLElement;
-  defaults: DisclosureOptions;
-  settings: DisclosureOptions;
-  detailsElements: NodeListOf<HTMLDetailsElement>;
-  summaryElements: NodeListOf<HTMLElement>;
-  contentElements: NodeListOf<HTMLElement>;
-  animations: (Animation | null)[] = [];
+  private rootElements: HTMLElement;
+  private defaults: DisclosureOptions;
+  private settings: DisclosureOptions;
+  private detailsElements: NodeListOf<HTMLDetailsElement>;
+  private summaryElements: NodeListOf<HTMLElement>;
+  private contentElements: NodeListOf<HTMLElement>;
+  private animations: (Animation | null)[] = [];
 
   constructor(root: HTMLElement, options?: Partial<DisclosureOptions>) {
     this.rootElements = root;
