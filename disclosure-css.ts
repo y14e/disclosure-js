@@ -1,8 +1,8 @@
 class Disclosure {
-  rootElement: HTMLElement;
-  detailsElements: NodeListOf<HTMLDetailsElement>;
-  summaryElements: NodeListOf<HTMLElement>;
-  contentElements: NodeListOf<HTMLElement>;
+  private rootElement: HTMLElement;
+  private detailsElements: NodeListOf<HTMLDetailsElement>;
+  private summaryElements: NodeListOf<HTMLElement>;
+  private contentElements: NodeListOf<HTMLElement>;
 
   constructor(root: HTMLElement) {
     this.rootElement = root;
