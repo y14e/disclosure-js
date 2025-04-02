@@ -112,7 +112,7 @@ class Disclosure {
         newIndex = length - 1;
         break;
     }
-    focusables[newIndex].focus();
+    focusables[newIndex]!.focus();
   }
 
   open(details: HTMLDetailsElement): void {
