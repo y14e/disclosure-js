@@ -1,4 +1,4 @@
-class Disclosure {
+export class Disclosure {
   constructor(root) {
     this.rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
@@ -68,5 +68,3 @@ class Disclosure {
     this.toggle(details, false);
   }
 }
-
-export default Disclosure;

@@ -1,4 +1,4 @@
-class Disclosure {
+export class Disclosure {
   private rootElement: HTMLElement;
   private detailsElements: NodeListOf<HTMLDetailsElement>;
   private summaryElements: NodeListOf<HTMLElement>;
@@ -73,5 +73,3 @@ class Disclosure {
     this.toggle(details, false);
   }
 }
-
-export default Disclosure;

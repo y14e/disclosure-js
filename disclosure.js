@@ -1,4 +1,4 @@
-class Disclosure {
+export class Disclosure {
   constructor(root, options) {
     this.rootElement = root;
     this.defaults = {
@@ -110,5 +110,3 @@ class Disclosure {
     this.toggle(details, false);
   }
 }
-
-export default Disclosure;

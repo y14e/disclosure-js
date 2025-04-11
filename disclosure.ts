@@ -5,7 +5,7 @@ type DisclosureOptions = {
   };
 };
 
-class Disclosure {
+export class Disclosure {
   private rootElements: HTMLElement;
   private defaults: DisclosureOptions;
   private settings: DisclosureOptions;
@@ -125,5 +125,3 @@ class Disclosure {
     this.toggle(details, false);
   }
 }
-
-export default Disclosure;
