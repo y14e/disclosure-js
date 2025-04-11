@@ -11,7 +11,7 @@ class Disclosure {
       animation: { ...this.defaults.animation, ...options?.animation },
     };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) this.settings.animation.duration = 0;
-    let NOT_NESTED = ':not(:scope summary + * *)';
+    const NOT_NESTED = ':not(:scope summary + * *)';
     this.detailsElements = this.rootElement.querySelectorAll(`details${NOT_NESTED}`);
     this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
@@ -25,7 +25,7 @@ class Disclosure {
   initialize() {
     this.detailsElements.forEach(details => {
       if (details.hasAttribute('name')) details.setAttribute('data-disclosure-name', details.getAttribute('name'));
-      let setData = () => details.setAttribute('data-disclosure-open', String(details.hasAttribute('open')));
+      const setData = () => details.setAttribute('data-disclosure-open', String(details.hasAttribute('open')));
       new MutationObserver(setData).observe(details, { attributeFilter: ['open'] });
       setData();
     });
@@ -48,20 +48,20 @@ class Disclosure {
   }
 
   toggle(details, isOpen) {
-    let name = details.getAttribute('data-disclosure-name');
+    const name = details.getAttribute('data-disclosure-name');
     if (name) {
       details.removeAttribute('name');
-      let opened = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`);
+      const opened = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`);
       if (isOpen && opened && opened !== details) this.close(opened);
     }
     window.requestAnimationFrame(() => details.setAttribute('data-disclosure-open', String(isOpen)));
-    let blockSize = window.getComputedStyle(details).getPropertyValue('block-size');
+    const blockSize = window.getComputedStyle(details).getPropertyValue('block-size');
     if (isOpen) details.setAttribute('open', '');
     details.style.setProperty('overflow', 'clip');
-    let index = [...this.detailsElements].indexOf(details);
+    const index = [...this.detailsElements].indexOf(details);
     let animation = this.animations[index];
     if (animation) animation.cancel();
-    let content = details.querySelector('summary + *');
+    const content = details.querySelector('summary + *');
     content.removeAttribute('hidden');
     animation = this.animations[index] = details.animate({ blockSize: [blockSize, `${parseInt(window.getComputedStyle(details.querySelector('summary')).getPropertyValue('block-size')) + (isOpen ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`] }, { duration: this.settings.animation.duration, easing: this.settings.animation.easing });
     animation.addEventListener('finish', () => {
@@ -74,17 +74,17 @@ class Disclosure {
 
   handleSummaryClick(event) {
     event.preventDefault();
-    let details = event.currentTarget.parentElement;
+    const details = event.currentTarget.parentElement;
     this.toggle(details, details.getAttribute('data-disclosure-open') !== 'true');
   }
 
   handleSummaryKeyDown(event) {
-    let { key } = event;
+    const { key } = event;
     if (!['ArrowUp', 'ArrowDown', 'End', 'Home'].includes(key)) return;
     event.preventDefault();
-    let focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement));
-    let currentIndex = focusables.indexOf(document.activeElement);
-    let length = focusables.length;
+    const focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement));
+    const currentIndex = focusables.indexOf(document.activeElement);
+    const length = focusables.length;
     let newIndex = 0;
     switch (key) {
       case 'ArrowUp':

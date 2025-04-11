@@ -6,7 +6,7 @@ class Disclosure {
 
   constructor(root: HTMLElement) {
     this.rootElement = root;
-    let NOT_NESTED = ':not(:scope summary + * *)';
+    const NOT_NESTED = ':not(:scope summary + * *)';
     this.detailsElements = this.rootElement.querySelectorAll(`details${NOT_NESTED}`);
     this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
@@ -42,12 +42,12 @@ class Disclosure {
   }
 
   private handleSummaryKeyDown(event: KeyboardEvent): void {
-    let { key } = event;
+    const { key } = event;
     if (!['ArrowUp', 'ArrowDown', 'End', 'Home'].includes(key)) return;
     event.preventDefault();
-    let focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement!));
-    let currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
-    let length = focusables.length;
+    const focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement!));
+    const currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
+    const length = focusables.length;
     let newIndex = 0;
     switch (key) {
       case 'ArrowUp':

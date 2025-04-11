@@ -26,7 +26,7 @@ class Disclosure {
       animation: { ...this.defaults.animation, ...options?.animation },
     };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) this.settings.animation.duration = 0;
-    let NOT_NESTED = ':not(:scope summary + * *)';
+    const NOT_NESTED = ':not(:scope summary + * *)';
     this.detailsElements = this.rootElements.querySelectorAll(`details${NOT_NESTED}`);
     this.summaryElements = this.rootElements.querySelectorAll(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElements.querySelectorAll(`summary${NOT_NESTED} + *`);
@@ -40,7 +40,7 @@ class Disclosure {
   private initialize(): void {
     this.detailsElements.forEach(details => {
       if (details.hasAttribute('name')) details.setAttribute('data-disclosure-name', details.getAttribute('name')!);
-      let setData = (): void => details.setAttribute('data-disclosure-open', String(details.hasAttribute('open')));
+      const setData = (): void => details.setAttribute('data-disclosure-open', String(details.hasAttribute('open')));
       new MutationObserver(setData).observe(details, { attributeFilter: ['open'] });
       setData();
     });
@@ -63,20 +63,20 @@ class Disclosure {
   }
 
   private toggle(details: HTMLDetailsElement, isOpen: boolean): void {
-    let name = details.getAttribute('data-disclosure-name');
+    const name = details.getAttribute('data-disclosure-name');
     if (name) {
       details.removeAttribute('name');
-      let opened = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`) as HTMLDetailsElement;
+      const opened = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`) as HTMLDetailsElement;
       if (isOpen && opened && opened !== details) this.close(opened);
     }
     window.requestAnimationFrame(() => details.setAttribute('data-disclosure-open', String(isOpen)));
-    let blockSize = window.getComputedStyle(details).getPropertyValue('block-size');
+    const blockSize = window.getComputedStyle(details).getPropertyValue('block-size');
     if (isOpen) details.setAttribute('open', '');
     details.style.setProperty('overflow', 'clip');
-    let index = [...this.detailsElements].indexOf(details);
+    const index = [...this.detailsElements].indexOf(details);
     let animation = this.animations[index];
     if (animation) animation.cancel();
-    let content = details.querySelector('summary + *')!;
+    const content = details.querySelector('summary + *')!;
     content.removeAttribute('hidden');
     animation = this.animations[index] = details.animate({ blockSize: [blockSize, `${parseInt(window.getComputedStyle(details.querySelector('summary')!).getPropertyValue('block-size')) + (isOpen ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`] }, { duration: this.settings.animation.duration, easing: this.settings.animation.easing });
     animation.addEventListener('finish', () => {
@@ -89,17 +89,17 @@ class Disclosure {
 
   private handleSummaryClick(event: MouseEvent): void {
     event.preventDefault();
-    let details = (event.currentTarget as HTMLDetailsElement).parentElement as HTMLDetailsElement;
+    const details = (event.currentTarget as HTMLDetailsElement).parentElement as HTMLDetailsElement;
     this.toggle(details, details.getAttribute('data-disclosure-open') !== 'true');
   }
 
   private handleSummaryKeyDown(event: KeyboardEvent): void {
-    let { key } = event;
+    const { key } = event;
     if (!['ArrowUp', 'ArrowDown', 'End', 'Home'].includes(key)) return;
     event.preventDefault();
-    let focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement!));
-    let currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
-    let length = focusables.length;
+    const focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement!));
+    const currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
+    const length = focusables.length;
     let newIndex = 0;
     switch (key) {
       case 'ArrowUp':
