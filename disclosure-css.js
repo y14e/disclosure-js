@@ -5,7 +5,9 @@ export class Disclosure {
     this.detailsElements = this.rootElement.querySelectorAll(`details${NOT_NESTED}`);
     this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
-    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
+    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
+      return;
+    }
     this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
     this.initialize();
   }
@@ -19,7 +21,9 @@ export class Disclosure {
       summary.addEventListener('keydown', this.handleSummaryKeyDown);
     });
     this.contentElements.forEach(content => {
-      if (!this.isFocusable(content.parentElement)) content.setAttribute('hidden', '');
+      if (!this.isFocusable(content.parentElement)) {
+        content.setAttribute('hidden', '');
+      }
     });
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
@@ -38,9 +42,13 @@ export class Disclosure {
 
   handleSummaryKeyDown(event) {
     const { key } = event;
-    if (!['ArrowUp', 'ArrowDown', 'End', 'Home'].includes(key)) return;
+    if (!['ArrowUp', 'ArrowDown', 'End', 'Home'].includes(key)) {
+      return;
+    }
     event.preventDefault();
-    const focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement));
+    const focusables = [...this.summaryElements].filter(summary => {
+      return this.isFocusable(summary.parentElement);
+    });
     const currentIndex = focusables.indexOf(document.activeElement);
     const length = focusables.length;
     let newIndex = 0;
@@ -59,12 +67,16 @@ export class Disclosure {
   }
 
   open(details) {
-    if (details.hasAttribute('open')) return;
+    if (details.hasAttribute('open')) {
+      return;
+    }
     this.toggle(details, true);
   }
 
   close(details) {
-    if (!details.hasAttribute('open')) return;
+    if (!details.hasAttribute('open')) {
+      return;
+    }
     this.toggle(details, false);
   }
 }

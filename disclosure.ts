@@ -6,7 +6,7 @@ type DisclosureOptions = {
 };
 
 export class Disclosure {
-  private rootElements: HTMLElement;
+  private rootElement: HTMLElement;
   private defaults: DisclosureOptions;
   private settings: DisclosureOptions;
   private detailsElements: NodeListOf<HTMLDetailsElement>;
@@ -15,7 +15,7 @@ export class Disclosure {
   private animations: (Animation | null)[] = [];
 
   constructor(root: HTMLElement, options?: Partial<DisclosureOptions>) {
-    this.rootElements = root;
+    this.rootElement = root;
     this.defaults = {
       animation: {
         duration: 300,
@@ -25,12 +25,16 @@ export class Disclosure {
     this.settings = {
       animation: { ...this.defaults.animation, ...options?.animation },
     };
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) this.settings.animation.duration = 0;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.settings.animation.duration = 0;
+    }
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.detailsElements = this.rootElements.querySelectorAll(`details${NOT_NESTED}`);
-    this.summaryElements = this.rootElements.querySelectorAll(`summary${NOT_NESTED}`);
-    this.contentElements = this.rootElements.querySelectorAll(`summary${NOT_NESTED} + *`);
-    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
+    this.detailsElements = this.rootElement.querySelectorAll(`details${NOT_NESTED}`);
+    this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
+    this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
+    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
+      return;
+    }
     this.animations = Array(this.detailsElements.length).fill(null);
     this.handleSummaryClick = this.handleSummaryClick.bind(this);
     this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
@@ -39,8 +43,12 @@ export class Disclosure {
 
   private initialize(): void {
     this.detailsElements.forEach(details => {
-      if (details.hasAttribute('name')) details.setAttribute('data-disclosure-name', details.getAttribute('name')!);
-      const setData = (): void => details.setAttribute('data-disclosure-open', String(details.hasAttribute('open')));
+      if (details.hasAttribute('name')) {
+        details.setAttribute('data-disclosure-name', details.getAttribute('name')!);
+      }
+      function setData(): void {
+        details.setAttribute('data-disclosure-open', String(details.hasAttribute('open')));
+      }
       new MutationObserver(setData).observe(details, { attributeFilter: ['open'] });
       setData();
     });
@@ -53,9 +61,11 @@ export class Disclosure {
       summary.addEventListener('keydown', this.handleSummaryKeyDown);
     });
     this.contentElements.forEach(content => {
-      if (!this.isFocusable(content.parentElement!)) content.setAttribute('hidden', '');
+      if (!this.isFocusable(content.parentElement!)) {
+        content.setAttribute('hidden', '');
+      }
     });
-    this.rootElements.setAttribute('data-disclosure-initialized', '');
+    this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
   private isFocusable(element: HTMLElement): boolean {
@@ -69,21 +79,33 @@ export class Disclosure {
       const opened = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`) as HTMLDetailsElement;
       if (isOpen && opened && opened !== details) this.close(opened);
     }
-    window.requestAnimationFrame(() => details.setAttribute('data-disclosure-open', String(isOpen)));
+    window.requestAnimationFrame(() => {
+      details.setAttribute('data-disclosure-open', String(isOpen));
+    });
     const blockSize = window.getComputedStyle(details).getPropertyValue('block-size');
-    if (isOpen) details.setAttribute('open', '');
+    if (isOpen) {
+      details.setAttribute('open', '');
+    }
     details.style.setProperty('overflow', 'clip');
     const index = [...this.detailsElements].indexOf(details);
     let animation = this.animations[index];
-    if (animation) animation.cancel();
+    if (animation) {
+      animation.cancel();
+    }
     const content = details.querySelector('summary + *')!;
     content.removeAttribute('hidden');
     animation = this.animations[index] = details.animate({ blockSize: [blockSize, `${parseInt(window.getComputedStyle(details.querySelector('summary')!).getPropertyValue('block-size')) + (isOpen ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`] }, { duration: this.settings.animation.duration, easing: this.settings.animation.easing });
     animation.addEventListener('finish', () => {
       this.animations[index] = null;
-      if (name) details.setAttribute('name', details.getAttribute('data-disclosure-name')!);
-      if (!isOpen) details.removeAttribute('open');
-      ['block-size', 'overflow'].forEach(name => details.style.removeProperty(name));
+      if (name) {
+        details.setAttribute('name', details.getAttribute('data-disclosure-name')!);
+      }
+      if (!isOpen) {
+        details.removeAttribute('open');
+      }
+      ['block-size', 'overflow'].forEach(name => {
+        details.style.removeProperty(name);
+      });
     });
   }
 
@@ -95,9 +117,13 @@ export class Disclosure {
 
   private handleSummaryKeyDown(event: KeyboardEvent): void {
     const { key } = event;
-    if (!['ArrowUp', 'ArrowDown', 'End', 'Home'].includes(key)) return;
+    if (!['ArrowUp', 'ArrowDown', 'End', 'Home'].includes(key)) {
+      return;
+    }
     event.preventDefault();
-    const focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement!));
+    const focusables = [...this.summaryElements].filter(summary => {
+      return this.isFocusable(summary.parentElement!);
+    });
     const currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
     const length = focusables.length;
     let newIndex = 0;
@@ -116,12 +142,16 @@ export class Disclosure {
   }
 
   open(details: HTMLDetailsElement): void {
-    if (details.getAttribute('data-disclosure-open') === 'true') return;
+    if (details.getAttribute('data-disclosure-open') === 'true') {
+      return;
+    }
     this.toggle(details, true);
   }
 
   close(details: HTMLDetailsElement): void {
-    if (details.getAttribute('data-disclosure-open') === 'false') return;
+    if (details.getAttribute('data-disclosure-open') === 'false') {
+      return;
+    }
     this.toggle(details, false);
   }
 }
