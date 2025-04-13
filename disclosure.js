@@ -62,7 +62,9 @@ export class Disclosure {
     if (name) {
       details.removeAttribute('name');
       const opened = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`);
-      if (isOpen && opened && opened !== details) this.close(opened);
+      if (isOpen && opened && opened !== details) {
+        this.close(opened);
+      }
     }
     window.requestAnimationFrame(() => {
       details.setAttribute('data-disclosure-open', String(isOpen));
