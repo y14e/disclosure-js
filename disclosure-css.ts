@@ -51,9 +51,7 @@ export class Disclosure {
       return;
     }
     event.preventDefault();
-    const focusables = [...this.summaryElements].filter(summary => {
-      return this.isFocusable(summary.parentElement!);
-    });
+    const focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement!));
     const currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
     const length = focusables.length;
     let newIndex = 0;
