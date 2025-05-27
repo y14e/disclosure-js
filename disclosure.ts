@@ -126,7 +126,7 @@ export class Disclosure {
     const focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement!));
     const currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
     const length = focusables.length;
-    let newIndex;
+    let newIndex: number;
     switch (key) {
       case 'End':
         newIndex = length - 1;
@@ -141,7 +141,7 @@ export class Disclosure {
         newIndex = (currentIndex + 1) % length;
         break;
     }
-    focusables[newIndex]!.focus();
+    focusables[newIndex!].focus();
   }
 
   open(details: HTMLDetailsElement): void {
