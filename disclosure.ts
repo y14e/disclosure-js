@@ -119,23 +119,26 @@ export class Disclosure {
 
   private handleSummaryKeyDown(event: KeyboardEvent): void {
     const { key } = event;
-    if (!['ArrowUp', 'ArrowDown', 'End', 'Home'].includes(key)) {
+    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) {
       return;
     }
     event.preventDefault();
     const focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement!));
     const currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
     const length = focusables.length;
-    let newIndex = 0;
+    let newIndex;
     switch (key) {
+      case 'End':
+        newIndex = length - 1;
+        break;
+      case 'Home':
+        newIndex = 0;
+        break;
       case 'ArrowUp':
         newIndex = (currentIndex - 1 + length) % length;
         break;
       case 'ArrowDown':
         newIndex = (currentIndex + 1) % length;
-        break;
-      case 'End':
-        newIndex = length - 1;
         break;
     }
     focusables[newIndex]!.focus();
