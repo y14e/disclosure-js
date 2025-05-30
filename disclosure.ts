@@ -23,7 +23,10 @@ export class Disclosure {
       },
     };
     this.settings = {
-      animation: { ...this.defaults.animation, ...options?.animation },
+      animation: {
+        ...this.defaults.animation,
+        ...options?.animation,
+      },
     };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       this.settings.animation.duration = 0;
@@ -96,7 +99,15 @@ export class Disclosure {
     }
     const content = details.querySelector('summary + *')!;
     content.removeAttribute('hidden');
-    animation = this.animations[index] = details.animate({ blockSize: [blockSize, `${parseInt(window.getComputedStyle(details.querySelector('summary')!).getPropertyValue('block-size')) + (isOpen ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`] }, { duration: this.settings.animation.duration, easing: this.settings.animation.easing });
+    animation = this.animations[index] = details.animate(
+      {
+        blockSize: [blockSize, `${parseInt(window.getComputedStyle(details.querySelector('summary')!).getPropertyValue('block-size')) + (isOpen ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`],
+      },
+      {
+        duration: this.settings.animation.duration,
+        easing: this.settings.animation.easing,
+      },
+    );
     animation.addEventListener('finish', () => {
       this.animations[index] = null;
       if (name) {
