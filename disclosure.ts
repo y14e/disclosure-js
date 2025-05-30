@@ -52,7 +52,9 @@ export class Disclosure {
       function setData(): void {
         details.setAttribute('data-disclosure-open', String(details.hasAttribute('open')));
       }
-      new MutationObserver(setData).observe(details, { attributeFilter: ['open'] });
+      new MutationObserver(setData).observe(details, {
+        attributeFilter: ['open'],
+      });
       setData();
     });
     this.summaryElements.forEach(summary => {
