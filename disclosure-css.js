@@ -2,9 +2,9 @@ export class Disclosure {
   constructor(root) {
     this.rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.detailsElements = this.rootElement.querySelectorAll(`details${NOT_NESTED}`);
-    this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
-    this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
+    this.detailsElements = [...this.rootElement.querySelectorAll(`details${NOT_NESTED}`)];
+    this.summaryElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED}`)];
+    this.contentElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`)];
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
@@ -46,7 +46,7 @@ export class Disclosure {
       return;
     }
     event.preventDefault();
-    const focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement));
+    const focusables = this.summaryElements.filter(summary => this.isFocusable(summary.parentElement));
     const currentIndex = focusables.indexOf(document.activeElement);
     const length = focusables.length;
     let newIndex;

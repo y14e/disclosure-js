@@ -1,15 +1,15 @@
 export class Disclosure {
   private rootElement: HTMLElement;
-  private detailsElements: NodeListOf<HTMLDetailsElement>;
-  private summaryElements: NodeListOf<HTMLElement>;
-  private contentElements: NodeListOf<HTMLElement>;
+  private detailsElements: HTMLDetailsElement[];
+  private summaryElements: HTMLElement[];
+  private contentElements: HTMLElement[];
 
   constructor(root: HTMLElement) {
     this.rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.detailsElements = this.rootElement.querySelectorAll(`details${NOT_NESTED}`);
-    this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
-    this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
+    this.detailsElements = [...this.rootElement.querySelectorAll(`details${NOT_NESTED}`)] as HTMLDetailsElement[];
+    this.summaryElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED}`)] as HTMLElement[];
+    this.contentElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`)] as HTMLElement[];
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
@@ -51,7 +51,7 @@ export class Disclosure {
       return;
     }
     event.preventDefault();
-    const focusables = [...this.summaryElements].filter(summary => this.isFocusable(summary.parentElement!));
+    const focusables = this.summaryElements.filter(summary => this.isFocusable(summary.parentElement!));
     const currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
     const length = focusables.length;
     let newIndex: number;
