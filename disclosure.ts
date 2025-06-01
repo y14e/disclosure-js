@@ -12,7 +12,7 @@ export class Disclosure {
   private detailsElements: HTMLDetailsElement[];
   private summaryElements: HTMLElement[];
   private contentElements: HTMLElement[];
-  private animations: (Animation | null)[] = [];
+  private animations!: (Animation | null)[];
 
   constructor(root: HTMLElement, options?: Partial<DisclosureOptions>) {
     this.rootElement = root;
