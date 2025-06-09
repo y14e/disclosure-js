@@ -13,13 +13,12 @@ export class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
-    this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
     this.summaryElements.forEach(summary => {
       if (!this.isFocusable(summary.parentElement!)) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('keydown', this.handleSummaryKeyDown);
+      summary.addEventListener('keydown', this.handleSummaryKeyDown.bind(this));
     });
     this.contentElements.forEach(content => {
       if (!this.isFocusable(content.parentElement!)) {
