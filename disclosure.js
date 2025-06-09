@@ -23,13 +23,6 @@ export class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
-    this.animations = Array(this.detailsElements.length).fill(null);
-    this.handleSummaryClick = this.handleSummaryClick.bind(this);
-    this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
-    this.initialize();
-  }
-
-  initialize() {
     this.detailsElements.forEach(details => {
       if (details.hasAttribute('name')) {
         details.setAttribute('data-disclosure-name', details.getAttribute('name'));
@@ -55,6 +48,9 @@ export class Disclosure {
         content.setAttribute('hidden', '');
       }
     });
+    this.animations = Array(this.detailsElements.length).fill(null);
+    this.handleSummaryClick = this.handleSummaryClick.bind(this);
+    this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 

@@ -8,11 +8,6 @@ export class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
-    this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
-    this.initialize();
-  }
-
-  initialize() {
     this.summaryElements.forEach(summary => {
       if (!this.isFocusable(summary.parentElement)) {
         summary.setAttribute('tabindex', '-1');
@@ -25,6 +20,7 @@ export class Disclosure {
         content.setAttribute('hidden', '');
       }
     });
+    this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
