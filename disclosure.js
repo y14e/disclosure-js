@@ -20,10 +20,16 @@ export class Disclosure {
     this.detailsElements = [...this.rootElement.querySelectorAll(`details${NOT_NESTED}`)];
     this.summaryElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED}`)];
     this.contentElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`)];
+    this.animations = Array(this.detailsElements.length).fill(null);
+    this.handleSummaryClick = this.handleSummaryClick.bind(this);
+    this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
+    this.initialize();
+  }
+
+  initialize() {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
-    this.animations = Array(this.detailsElements.length).fill(null);
     this.detailsElements.forEach(details => {
       if (details.hasAttribute('name')) {
         details.setAttribute('data-disclosure-name', details.getAttribute('name'));
@@ -41,8 +47,8 @@ export class Disclosure {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('click', this.handleSummaryClick.bind(this));
-      summary.addEventListener('keydown', this.handleSummaryKeyDown.bind(this));
+      summary.addEventListener('click', this.handleSummaryClick);
+      summary.addEventListener('keydown', this.handleSummaryKeyDown);
     });
     this.contentElements.forEach(content => {
       if (!this.isFocusable(content.parentElement)) {
