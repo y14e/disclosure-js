@@ -32,8 +32,8 @@ export class Disclosure {
     return element.getAttribute('aria-disabled') !== 'true' && !element.hasAttribute('disabled');
   }
 
-  private toggle(details: HTMLDetailsElement, isOpen: boolean): void {
-    if (isOpen) {
+  private toggle(details: HTMLDetailsElement, open: boolean): void {
+    if (open) {
       details.setAttribute('open', '');
     } else {
       details.removeAttribute('open');

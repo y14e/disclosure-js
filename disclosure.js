@@ -56,20 +56,20 @@ export class Disclosure {
     return element.getAttribute('aria-disabled') !== 'true' && !element.hasAttribute('disabled');
   }
 
-  toggle(details, isOpen) {
+  toggle(details, open) {
     const name = details.getAttribute('data-disclosure-name');
     if (name) {
       details.removeAttribute('name');
-      const opened = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`);
-      if (isOpen && opened && opened !== details) {
-        this.close(opened);
+      const current = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`);
+      if (open && current && current !== details) {
+        this.close(current);
       }
     }
     window.requestAnimationFrame(() => {
-      details.setAttribute('data-disclosure-open', String(isOpen));
+      details.setAttribute('data-disclosure-open', String(open));
     });
     const blockSize = window.getComputedStyle(details).getPropertyValue('block-size');
-    if (isOpen) {
+    if (open) {
       details.setAttribute('open', '');
     }
     details.style.setProperty('overflow', 'clip');
@@ -82,7 +82,7 @@ export class Disclosure {
     content.removeAttribute('hidden');
     animation = this.animations[index] = details.animate(
       {
-        blockSize: [blockSize, `${parseInt(window.getComputedStyle(details.querySelector('summary')).getPropertyValue('block-size')) + (isOpen ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`],
+        blockSize: [blockSize, `${parseInt(window.getComputedStyle(details.querySelector('summary')).getPropertyValue('block-size')) + (open ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`],
       },
       {
         duration: this.settings.animation.duration,
@@ -94,7 +94,7 @@ export class Disclosure {
       if (name) {
         details.setAttribute('name', details.getAttribute('data-disclosure-name'));
       }
-      if (!isOpen) {
+      if (!open) {
         details.removeAttribute('open');
       }
       ['block-size', 'overflow'].forEach(name => {
