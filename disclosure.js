@@ -58,6 +58,9 @@ export class Disclosure {
   }
 
   toggle(details, open) {
+    if ((open && details.getAttribute('data-disclosure-open') === 'true') || (!open && details.getAttribute('data-disclosure-open') === 'false')) {
+      return;
+    }
     const name = details.getAttribute('data-disclosure-name');
     if (name) {
       details.removeAttribute('name');
@@ -138,16 +141,10 @@ export class Disclosure {
   }
 
   open(details) {
-    if (details.getAttribute('data-disclosure-open') === 'true') {
-      return;
-    }
     this.toggle(details, true);
   }
 
   close(details) {
-    if (details.getAttribute('data-disclosure-open') === 'false') {
-      return;
-    }
     this.toggle(details, false);
   }
 }

@@ -33,6 +33,9 @@ export class Disclosure {
   }
 
   private toggle(details: HTMLDetailsElement, open: boolean): void {
+    if ((open && details.open) || (!open && !details.open)) {
+      return;
+    }
     details.open = open;
   }
 
@@ -64,16 +67,10 @@ export class Disclosure {
   }
 
   open(details: HTMLDetailsElement): void {
-    if (details.open) {
-      return;
-    }
     this.toggle(details, true);
   }
 
   close(details: HTMLDetailsElement): void {
-    if (!details.open) {
-      return;
-    }
     this.toggle(details, false);
   }
 }

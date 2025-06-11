@@ -28,6 +28,9 @@ export class Disclosure {
   }
 
   toggle(details, open) {
+    if ((open && details.open) || (!open && !details.open)) {
+      return;
+    }
     details.open = open;
   }
 
@@ -59,16 +62,10 @@ export class Disclosure {
   }
 
   open(details) {
-    if (details.open) {
-      return;
-    }
     this.toggle(details, true);
   }
 
   close(details) {
-    if (!details.open) {
-      return;
-    }
     this.toggle(details, false);
   }
 }
