@@ -31,11 +31,11 @@ export class Disclosure {
       return;
     }
     this.detailsElements.forEach(details => {
-      if (details.hasAttribute('name')) {
-        details.setAttribute('data-disclosure-name', details.getAttribute('name'));
+      if (details.name) {
+        details.setAttribute('data-disclosure-name', details.name);
       }
       function setData() {
-        details.setAttribute('data-disclosure-open', String(details.hasAttribute('open')));
+        details.setAttribute('data-disclosure-open', String(details.open));
       }
       new MutationObserver(setData).observe(details, {
         attributeFilter: ['open'],
@@ -44,22 +44,17 @@ export class Disclosure {
     });
     this.summaryElements.forEach(summary => {
       if (!this.isFocusable(summary.parentElement)) {
-        summary.setAttribute('tabindex', '-1');
+        summary.tabIndex = -1;
         summary.style.setProperty('pointer-events', 'none');
       }
       summary.addEventListener('click', this.handleSummaryClick);
       summary.addEventListener('keydown', this.handleSummaryKeyDown);
     });
-    this.contentElements.forEach(content => {
-      if (!this.isFocusable(content.parentElement)) {
-        content.setAttribute('hidden', '');
-      }
-    });
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
   isFocusable(element) {
-    return element.getAttribute('aria-disabled') !== 'true' && !element.hasAttribute('disabled');
+    return element.ariaDisabled !== 'true';
   }
 
   toggle(details, open) {
@@ -74,9 +69,9 @@ export class Disclosure {
     window.requestAnimationFrame(() => {
       details.setAttribute('data-disclosure-open', String(open));
     });
-    const blockSize = window.getComputedStyle(details).getPropertyValue('block-size');
+    const size = window.getComputedStyle(details).getPropertyValue('block-size');
     if (open) {
-      details.setAttribute('open', '');
+      details.open = true;
     }
     details.style.setProperty('overflow', 'clip');
     const index = this.detailsElements.indexOf(details);
@@ -88,7 +83,7 @@ export class Disclosure {
     content.removeAttribute('hidden');
     animation = this.animations[index] = details.animate(
       {
-        blockSize: [blockSize, `${parseInt(window.getComputedStyle(details.querySelector('summary')).getPropertyValue('block-size')) + (open ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`],
+        blockSize: [size, `${parseInt(window.getComputedStyle(details.querySelector('summary')).getPropertyValue('block-size')) + (open ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`],
       },
       {
         duration: this.settings.animation.duration,
@@ -98,10 +93,10 @@ export class Disclosure {
     animation.addEventListener('finish', () => {
       this.animations[index] = null;
       if (name) {
-        details.setAttribute('name', details.getAttribute('data-disclosure-name'));
+        details.name = details.getAttribute('data-disclosure-name');
       }
       if (!open) {
-        details.removeAttribute('open');
+        details.open = false;
       }
       ['block-size', 'overflow'].forEach(name => {
         details.style.removeProperty(name);
@@ -112,7 +107,7 @@ export class Disclosure {
   handleSummaryClick(event) {
     event.preventDefault();
     const details = event.currentTarget.parentElement;
-    this.toggle(details, details.getAttribute('data-disclosure-open') !== 'true');
+    this.toggle(details, details.getAttribute('data-disclosure-open') === 'false');
   }
 
   handleSummaryKeyDown(event) {

@@ -20,29 +20,20 @@ export class Disclosure {
     }
     this.summaryElements.forEach(summary => {
       if (!this.isFocusable(summary.parentElement!)) {
-        summary.setAttribute('tabindex', '-1');
+        summary.tabIndex = -1;
         summary.style.setProperty('pointer-events', 'none');
       }
       summary.addEventListener('keydown', this.handleSummaryKeyDown);
-    });
-    this.contentElements.forEach(content => {
-      if (!this.isFocusable(content.parentElement!)) {
-        content.setAttribute('hidden', '');
-      }
     });
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
   private isFocusable(element: HTMLElement): boolean {
-    return element.getAttribute('aria-disabled') !== 'true' && !element.hasAttribute('disabled');
+    return element.ariaDisabled !== 'true';
   }
 
   private toggle(details: HTMLDetailsElement, open: boolean): void {
-    if (open) {
-      details.setAttribute('open', '');
-    } else {
-      details.removeAttribute('open');
-    }
+    details.open = open;
   }
 
   private handleSummaryKeyDown(event: KeyboardEvent): void {
@@ -73,14 +64,14 @@ export class Disclosure {
   }
 
   open(details: HTMLDetailsElement): void {
-    if (details.hasAttribute('open')) {
+    if (details.open) {
       return;
     }
     this.toggle(details, true);
   }
 
   close(details: HTMLDetailsElement): void {
-    if (!details.hasAttribute('open')) {
+    if (!details.open) {
       return;
     }
     this.toggle(details, false);

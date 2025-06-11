@@ -8,7 +8,6 @@ export class Disclosure {
     this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
     this.initialize();
   }
-
   initialize() {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
@@ -22,15 +21,12 @@ export class Disclosure {
     });
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
-
   isFocusable(element) {
     return element.ariaDisabled !== 'true';
   }
-
   toggle(details, open) {
     details.open = open;
   }
-
   handleSummaryKeyDown(event) {
     const { key } = event;
     if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) {
@@ -57,14 +53,12 @@ export class Disclosure {
     }
     focusables[newIndex].focus();
   }
-
   open(details) {
     if (details.open) {
       return;
     }
     this.toggle(details, true);
   }
-
   close(details) {
     if (!details.open) {
       return;
