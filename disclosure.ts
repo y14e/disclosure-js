@@ -124,6 +124,7 @@ export class Disclosure {
 
   private handleSummaryClick(event: MouseEvent): void {
     event.preventDefault();
+    event.stopPropagation();
     const details = (event.currentTarget as HTMLDetailsElement).parentElement as HTMLDetailsElement;
     this.toggle(details, details.getAttribute('data-disclosure-open') === 'false');
   }
@@ -134,6 +135,7 @@ export class Disclosure {
       return;
     }
     event.preventDefault();
+    event.stopPropagation();
     const focusables = this.summaryElements.filter(summary => this.isFocusable(summary.parentElement!));
     const currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
     const length = focusables.length;
