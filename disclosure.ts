@@ -73,7 +73,7 @@ export class Disclosure {
   }
 
   private toggle(details: HTMLDetailsElement, open: boolean): void {
-    if ((open && details.getAttribute('data-disclosure-open') === 'true') || (!open && details.getAttribute('data-disclosure-open') === 'false')) {
+    if (open.toString() === details.getAttribute('data-disclosure-open')) {
       return;
     }
     const name = details.getAttribute('data-disclosure-name');

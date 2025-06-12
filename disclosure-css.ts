@@ -33,7 +33,7 @@ export class Disclosure {
   }
 
   private toggle(details: HTMLDetailsElement, open: boolean): void {
-    if ((open && details.open) || (!open && !details.open)) {
+    if (open === details.open) {
       return;
     }
     details.open = open;

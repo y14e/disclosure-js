@@ -28,7 +28,7 @@ export class Disclosure {
   }
 
   toggle(details, open) {
-    if ((open && details.open) || (!open && !details.open)) {
+    if (open === details.open) {
       return;
     }
     details.open = open;
