@@ -42,8 +42,8 @@ export class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const focusables = this.summaryElements.filter(summary => this.isFocusable(summary.parentElement));
-    const currentIndex = focusables.indexOf(document.activeElement);
     const length = focusables.length;
+    const currentIndex = focusables.indexOf(document.activeElement);
     let newIndex;
     switch (key) {
       case 'End':
