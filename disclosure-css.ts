@@ -5,6 +5,9 @@ export class Disclosure {
   private contentElements: HTMLElement[];
 
   constructor(root: HTMLElement) {
+    if (!root) {
+      return;
+    }
     this.rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
     this.detailsElements = [...this.rootElement.querySelectorAll(`details${NOT_NESTED}`)] as HTMLDetailsElement[];
@@ -48,7 +51,12 @@ export class Disclosure {
     event.stopPropagation();
     const focusables = this.summaryElements.filter(summary => this.isFocusable(summary.parentElement!));
     const length = focusables.length;
-    const currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
+    const active = document.activeElement;
+    const current = active instanceof HTMLElement ? active : null;
+    if (!current) {
+      return;
+    }
+    const currentIndex = focusables.indexOf(current);
     let newIndex!: number;
     switch (key) {
       case 'End':
@@ -68,10 +76,16 @@ export class Disclosure {
   }
 
   open(details: HTMLDetailsElement): void {
+    if (!this.detailsElements.includes(details)) {
+      return;
+    }
     this.toggle(details, true);
   }
 
   close(details: HTMLDetailsElement): void {
+    if (!this.detailsElements.includes(details)) {
+      return;
+    }
     this.toggle(details, false);
   }
 }

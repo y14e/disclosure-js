@@ -1,5 +1,8 @@
 export class Disclosure {
   constructor(root, options) {
+    if (!root) {
+      return;
+    }
     this.rootElement = root;
     this.defaults = {
       animation: {
@@ -123,7 +126,12 @@ export class Disclosure {
     event.stopPropagation();
     const focusables = this.summaryElements.filter(summary => this.isFocusable(summary.parentElement));
     const length = focusables.length;
-    const currentIndex = focusables.indexOf(document.activeElement);
+    const active = document.activeElement;
+    const current = active instanceof HTMLElement ? active : null;
+    if (!current) {
+      return;
+    }
+    const currentIndex = focusables.indexOf(current);
     let newIndex;
     switch (key) {
       case 'End':
@@ -143,10 +151,16 @@ export class Disclosure {
   }
 
   open(details) {
+    if (!this.detailsElements.includes(details)) {
+      return;
+    }
     this.toggle(details, true);
   }
 
   close(details) {
+    if (!this.detailsElements.includes(details)) {
+      return;
+    }
     this.toggle(details, false);
   }
 }
