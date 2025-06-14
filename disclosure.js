@@ -101,9 +101,7 @@ export class Disclosure {
       if (!open) {
         details.open = false;
       }
-      ['block-size', 'overflow'].forEach(name => {
-        details.style.removeProperty(name);
-      });
+      ['block-size', 'overflow'].forEach(name => details.style.removeProperty(name));
     });
   }
 
