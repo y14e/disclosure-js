@@ -11,10 +11,7 @@ export class Disclosure {
       },
     };
     this.settings = {
-      animation: {
-        ...this.defaults.animation,
-        ...options?.animation,
-      },
+      animation: { ...this.defaults.animation, ...options?.animation },
     };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       this.settings.animation.duration = 0;
