@@ -1,8 +1,8 @@
 export class Disclosure {
-  private rootElement: HTMLElement;
-  private detailsElements: HTMLDetailsElement[];
-  private summaryElements: HTMLElement[];
-  private contentElements: HTMLElement[];
+  private rootElement!: HTMLElement;
+  private detailsElements!: HTMLDetailsElement[];
+  private summaryElements!: HTMLElement[];
+  private contentElements!: HTMLElement[];
 
   constructor(root: HTMLElement) {
     if (!root) {

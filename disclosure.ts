@@ -6,12 +6,12 @@ type DisclosureOptions = {
 };
 
 export class Disclosure {
-  private rootElement: HTMLElement;
-  private defaults: DisclosureOptions;
-  private settings: DisclosureOptions;
-  private detailsElements: HTMLDetailsElement[];
-  private summaryElements: HTMLElement[];
-  private contentElements: HTMLElement[];
+  private rootElement!: HTMLElement;
+  private defaults!: DisclosureOptions;
+  private settings!: DisclosureOptions;
+  private detailsElements!: HTMLDetailsElement[];
+  private summaryElements!: HTMLElement[];
+  private contentElements!: HTMLElement[];
   private animations!: (Animation | null)[];
 
   constructor(root: HTMLElement, options?: Partial<DisclosureOptions>) {
