@@ -35,7 +35,7 @@ export class Disclosure {
         details.setAttribute('data-disclosure-name', details.name);
       }
       function setData() {
-        details.setAttribute('data-disclosure-open', String(details.open));
+        details.toggleAttribute('data-disclosure-open', details.open);
       }
       new MutationObserver(setData).observe(details, {
         attributeFilter: ['open'],
@@ -58,19 +58,19 @@ export class Disclosure {
   }
 
   toggle(details, open) {
-    if (open.toString() === details.getAttribute('data-disclosure-open')) {
+    if (open === details.hasAttribute('data-disclosure-open')) {
       return;
     }
     const name = details.getAttribute('data-disclosure-name');
     if (name) {
       details.removeAttribute('name');
-      const current = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open="true"]`);
+      const current = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open]`);
       if (open && current && current !== details) {
         this.close(current);
       }
     }
     window.requestAnimationFrame(() => {
-      details.setAttribute('data-disclosure-open', String(open));
+      details.toggleAttribute('data-disclosure-open', open);
     });
     const size = window.getComputedStyle(details).getPropertyValue('block-size');
     if (open) {
@@ -109,7 +109,7 @@ export class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const details = event.currentTarget.parentElement;
-    this.toggle(details, details.getAttribute('data-disclosure-open') === 'false');
+    this.toggle(details, !details.hasAttribute('data-disclosure-open'));
   }
 
   handleSummaryKeyDown(event) {
