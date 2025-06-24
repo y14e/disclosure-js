@@ -53,6 +53,14 @@ export class Disclosure {
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
+  getActiveElement() {
+    let active = document.activeElement;
+    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
+      active = active.shadowRoot.activeElement;
+    }
+    return active instanceof HTMLElement ? active : null;
+  }
+
   isFocusable(element) {
     return element.ariaDisabled !== 'true';
   }
@@ -121,7 +129,7 @@ export class Disclosure {
     event.stopPropagation();
     const focusables = this.summaryElements.filter(summary => this.isFocusable(summary.parentElement));
     const length = focusables.length;
-    const active = document.activeElement;
+    const active = this.getActiveElement();
     const current = active instanceof HTMLElement ? active : null;
     if (!current) {
       return;
