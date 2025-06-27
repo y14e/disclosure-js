@@ -87,7 +87,7 @@ export class Disclosure {
     const name = details.getAttribute('data-disclosure-name');
     if (name) {
       details.removeAttribute('name');
-      const current = document.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open]`) as HTMLDetailsElement;
+      const current = this.rootElement.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open]`) as HTMLDetailsElement;
       if (open && current && current !== details) {
         this.close(current);
       }
