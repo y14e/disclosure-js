@@ -57,9 +57,9 @@ export class Disclosure {
       });
       setData();
     });
-    this.summaryElements.forEach(summary => {
-      if (!this.isFocusable(summary.parentElement!)) {
-        summary.tabIndex = -1;
+    this.summaryElements.forEach((summary, i) => {
+      if (!this.isFocusable(this.detailsElements[i])) {
+        summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
       summary.addEventListener('click', this.handleSummaryClick);
@@ -77,10 +77,12 @@ export class Disclosure {
   }
 
   private isFocusable(element: HTMLElement): boolean {
-    return element.ariaDisabled !== 'true';
+    return element.getAttribute('aria-disabled') !== 'true';
   }
 
-  private toggle(details: HTMLDetailsElement, open: boolean): void {
+  private toggle(summary: HTMLElement, open: boolean): void {
+    const index = this.summaryElements.indexOf(summary);
+    const details = this.detailsElements[index];
     if (open === details.hasAttribute('data-disclosure-open')) {
       return;
     }
@@ -92,24 +94,23 @@ export class Disclosure {
         this.close(current);
       }
     }
-    window.requestAnimationFrame(() => {
-      details.toggleAttribute('data-disclosure-open', open);
-    });
-    const size = window.getComputedStyle(details).getPropertyValue('block-size');
-    if (open) {
-      details.open = true;
-    }
-    details.style.setProperty('overflow', 'clip');
-    const index = this.detailsElements.indexOf(details);
+    const content = this.contentElements[index];
+    const computed = window.getComputedStyle(content);
+    const size = details.hasAttribute('open') ? computed.getPropertyValue('block-size') : '0';
     let animation = this.animations[index];
     if (animation) {
       animation.cancel();
     }
-    const content = details.querySelector('summary + *')!;
-    content.removeAttribute('hidden');
-    animation = this.animations[index] = details.animate(
+    if (open) {
+      details.setAttribute('open', '');
+    }
+    window.requestAnimationFrame(() => {
+      details.toggleAttribute('data-disclosure-open', open);
+    });
+    content.style.setProperty('overflow', 'clip');
+    animation = this.animations[index] = content.animate(
       {
-        blockSize: [size, `${parseInt(window.getComputedStyle(details.querySelector('summary')!).getPropertyValue('block-size')) + (open ? parseInt(window.getComputedStyle(content).getPropertyValue('block-size')) : 0)}px`],
+        blockSize: [size, open ? computed.getPropertyValue('block-size') : '0'],
       },
       {
         duration: this.settings.animation.duration,
@@ -119,20 +120,20 @@ export class Disclosure {
     animation.addEventListener('finish', () => {
       this.animations[index] = null;
       if (name) {
-        details.name = details.getAttribute('data-disclosure-name')!;
+        details.setAttribute('name', details.getAttribute('data-disclosure-name')!);
       }
       if (!open) {
-        details.open = false;
+        details.removeAttribute('open');
       }
-      ['block-size', 'overflow'].forEach(name => details.style.removeProperty(name));
+      ['block-size', 'overflow'].forEach(name => content.style.removeProperty(name));
     });
   }
 
   private handleSummaryClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    const details = (event.currentTarget as HTMLDetailsElement).parentElement as HTMLDetailsElement;
-    this.toggle(details, !details.hasAttribute('data-disclosure-open'));
+    const summary = event.currentTarget as HTMLElement;
+    this.toggle(summary, !this.detailsElements[this.summaryElements.indexOf(summary)].hasAttribute('data-disclosure-open'));
   }
 
   private handleSummaryKeyDown(event: KeyboardEvent): void {
@@ -142,7 +143,7 @@ export class Disclosure {
     }
     event.preventDefault();
     event.stopPropagation();
-    const focusables = this.summaryElements.filter(summary => this.isFocusable(summary.parentElement!));
+    const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
     const length = focusables.length;
     const active = this.getActiveElement();
     const current = active instanceof HTMLElement ? active : null;
@@ -168,17 +169,17 @@ export class Disclosure {
     focusables[newIndex].focus();
   }
 
-  open(details: HTMLDetailsElement): void {
-    if (!this.detailsElements.includes(details)) {
+  open(summary: HTMLElement): void {
+    if (!this.summaryElements.includes(summary)) {
       return;
     }
-    this.toggle(details, true);
+    this.toggle(summary, true);
   }
 
-  close(details: HTMLDetailsElement): void {
-    if (!this.detailsElements.includes(details)) {
+  close(summary: HTMLElement): void {
+    if (!this.summaryElements.includes(summary)) {
       return;
     }
-    this.toggle(details, false);
+    this.toggle(summary, false);
   }
 }

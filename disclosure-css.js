@@ -16,9 +16,9 @@ export class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
-    this.summaryElements.forEach(summary => {
-      if (!this.isFocusable(summary.parentElement)) {
-        summary.tabIndex = -1;
+    this.summaryElements.forEach((summary, i) => {
+      if (!this.isFocusable(this.detailsElements[i])) {
+        summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
       summary.addEventListener('keydown', this.handleSummaryKeyDown);
@@ -35,14 +35,15 @@ export class Disclosure {
   }
 
   isFocusable(element) {
-    return element.ariaDisabled !== 'true';
+    return element.getAttribute('aria-disabled') !== 'true';
   }
 
-  toggle(details, open) {
-    if (open === details.open) {
+  toggle(summary, open) {
+    const details = this.detailsElements[this.summaryElements.indexOf(summary)];
+    if (open === details.hasAttribute('open')) {
       return;
     }
-    details.open = open;
+    details.toggleAttribute('open', open);
   }
 
   handleSummaryKeyDown(event) {
@@ -52,7 +53,7 @@ export class Disclosure {
     }
     event.preventDefault();
     event.stopPropagation();
-    const focusables = this.summaryElements.filter(summary => this.isFocusable(summary.parentElement));
+    const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
     const length = focusables.length;
     const active = this.getActiveElement();
     const current = active instanceof HTMLElement ? active : null;
@@ -78,17 +79,17 @@ export class Disclosure {
     focusables[newIndex].focus();
   }
 
-  open(details) {
-    if (!this.detailsElements.includes(details)) {
+  open(summary) {
+    if (!this.summaryElements.includes(summary)) {
       return;
     }
-    this.toggle(details, true);
+    this.toggle(summary, true);
   }
 
-  close(details) {
-    if (!this.detailsElements.includes(details)) {
+  close(summary) {
+    if (!this.summaryElements.includes(summary)) {
       return;
     }
-    this.toggle(details, false);
+    this.toggle(summary, false);
   }
 }
