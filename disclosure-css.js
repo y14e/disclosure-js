@@ -38,8 +38,7 @@ export class Disclosure {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 
-  toggle(summary, open) {
-    const details = this.detailsElements[this.summaryElements.indexOf(summary)];
+  toggle(details, open) {
     if (open === details.hasAttribute('open')) {
       return;
     }
@@ -79,17 +78,17 @@ export class Disclosure {
     focusables[newIndex].focus();
   }
 
-  open(summary) {
-    if (!this.summaryElements.includes(summary)) {
+  open(details) {
+    if (!this.detailsElements.includes(details)) {
       return;
     }
-    this.toggle(summary, true);
+    this.toggle(details, true);
   }
 
-  close(summary) {
-    if (!this.summaryElements.includes(summary)) {
+  close(details) {
+    if (!this.detailsElements.includes(details)) {
       return;
     }
-    this.toggle(summary, false);
+    this.toggle(details, false);
   }
 }

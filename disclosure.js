@@ -65,9 +65,7 @@ export class Disclosure {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 
-  toggle(summary, open) {
-    const index = this.summaryElements.indexOf(summary);
-    const details = this.detailsElements[index];
+  toggle(details, open) {
     if (open === details.hasAttribute('data-disclosure-open')) {
       return;
     }
@@ -79,6 +77,7 @@ export class Disclosure {
         this.close(current);
       }
     }
+    const index = this.detailsElements.indexOf(details);
     const content = this.contentElements[index];
     const computed = window.getComputedStyle(content);
     const size = details.hasAttribute('open') ? computed.getPropertyValue('block-size') : '0';
@@ -117,8 +116,8 @@ export class Disclosure {
   handleSummaryClick(event) {
     event.preventDefault();
     event.stopPropagation();
-    const summary = event.currentTarget;
-    this.toggle(summary, !this.detailsElements[this.summaryElements.indexOf(summary)].hasAttribute('data-disclosure-open'));
+    const details = this.detailsElements[this.summaryElements.indexOf(event.currentTarget)];
+    this.toggle(details, !details.hasAttribute('data-disclosure-open'));
   }
 
   handleSummaryKeyDown(event) {
@@ -154,17 +153,17 @@ export class Disclosure {
     focusables[newIndex].focus();
   }
 
-  open(summary) {
-    if (!this.summaryElements.includes(summary)) {
+  open(details) {
+    if (!this.detailsElements.includes(details)) {
       return;
     }
-    this.toggle(summary, true);
+    this.toggle(details, true);
   }
 
-  close(summary) {
-    if (!this.summaryElements.includes(summary)) {
+  close(details) {
+    if (!this.detailsElements.includes(details)) {
       return;
     }
-    this.toggle(summary, false);
+    this.toggle(details, false);
   }
 }

@@ -43,8 +43,7 @@ export class Disclosure {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 
-  private toggle(summary: HTMLElement, open: boolean): void {
-    const details = this.detailsElements[this.summaryElements.indexOf(summary)];
+  private toggle(details: HTMLDetailsElement, open: boolean): void {
     if (open === details.hasAttribute('open')) {
       return;
     }
@@ -84,17 +83,17 @@ export class Disclosure {
     focusables[newIndex].focus();
   }
 
-  open(summary: HTMLElement): void {
-    if (!this.summaryElements.includes(summary)) {
+  open(details: HTMLDetailsElement): void {
+    if (!this.detailsElements.includes(details)) {
       return;
     }
-    this.toggle(summary, true);
+    this.toggle(details, true);
   }
 
-  close(summary: HTMLElement): void {
-    if (!this.summaryElements.includes(summary)) {
+  close(details: HTMLDetailsElement): void {
+    if (!this.detailsElements.includes(details)) {
       return;
     }
-    this.toggle(summary, false);
+    this.toggle(details, false);
   }
 }
