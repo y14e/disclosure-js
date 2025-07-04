@@ -44,10 +44,10 @@ export class Disclosure {
   }
 
   private toggle(details: HTMLDetailsElement, open: boolean): void {
-    if (open === details.hasAttribute('open')) {
+    if (open === details.open) {
       return;
     }
-    details.toggleAttribute('open', open);
+    details.open = open;
   }
 
   private handleSummaryKeyDown(event: KeyboardEvent): void {

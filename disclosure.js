@@ -80,13 +80,13 @@ export class Disclosure {
     const index = this.detailsElements.indexOf(details);
     const content = this.contentElements[index];
     const computed = window.getComputedStyle(content);
-    const size = details.hasAttribute('open') ? computed.getPropertyValue('block-size') : '0';
+    const size = details.open ? computed.getPropertyValue('block-size') : '0';
     let animation = this.animations[index];
     if (animation) {
       animation.cancel();
     }
     if (open) {
-      details.setAttribute('open', '');
+      details.open = true;
     }
     window.requestAnimationFrame(() => {
       details.toggleAttribute('data-disclosure-open', open);
@@ -107,7 +107,7 @@ export class Disclosure {
         details.setAttribute('name', details.getAttribute('data-disclosure-name'));
       }
       if (!open) {
-        details.removeAttribute('open');
+        details.open = false;
       }
       ['block-size', 'overflow'].forEach(name => content.style.removeProperty(name));
     });

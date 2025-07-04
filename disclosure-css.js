@@ -39,10 +39,10 @@ export class Disclosure {
   }
 
   toggle(details, open) {
-    if (open === details.hasAttribute('open')) {
+    if (open === details.open) {
       return;
     }
-    details.toggleAttribute('open', open);
+    details.open = open;
   }
 
   handleSummaryKeyDown(event) {
