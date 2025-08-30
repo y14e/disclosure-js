@@ -2,7 +2,7 @@
 A disclosure pattern implementation in JS. Using the `<details>` and `<summary>` element.
 ## Installation
 ```js
-import { Disclosure } from './disclosure.js';
+import Disclosure from './disclosure.js';
 
 const myDisclosure = new Disclosure(...);
 ```
