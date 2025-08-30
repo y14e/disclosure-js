@@ -5,7 +5,7 @@ type DisclosureOptions = {
   };
 };
 
-export class Disclosure {
+export default class Disclosure {
   private rootElement!: HTMLElement;
   private defaults!: DisclosureOptions;
   private settings!: DisclosureOptions;

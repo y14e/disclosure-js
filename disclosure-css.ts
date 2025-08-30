@@ -1,4 +1,4 @@
-export class Disclosure {
+export default class Disclosure {
   private rootElement!: HTMLElement;
   private detailsElements!: HTMLDetailsElement[];
   private summaryElements!: HTMLElement[];

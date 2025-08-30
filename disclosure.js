@@ -1,4 +1,4 @@
-export class Disclosure {
+export default class Disclosure {
   constructor(root, options) {
     if (!root) {
       return;
