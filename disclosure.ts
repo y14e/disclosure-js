@@ -13,6 +13,8 @@ export default class Disclosure {
   private summaryElements!: HTMLElement[];
   private contentElements!: HTMLElement[];
   private animations!: (Animation | null)[];
+  private eventController!: AbortController;
+  private destroyed!: boolean;
 
   constructor(root: HTMLElement, options?: Partial<DisclosureOptions>) {
     if (!root) {
@@ -45,6 +47,7 @@ export default class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
+    const { signal } = this.eventController;
     this.detailsElements.forEach(details => {
       if (details.name) {
         details.setAttribute('data-disclosure-name', details.name);
@@ -62,8 +65,8 @@ export default class Disclosure {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('click', this.handleSummaryClick);
-      summary.addEventListener('keydown', this.handleSummaryKeyDown);
+      summary.addEventListener('click', this.handleSummaryClick, { signal });
+      summary.addEventListener('keydown', this.handleSummaryKeyDown, { signal });
     });
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
@@ -97,9 +100,7 @@ export default class Disclosure {
     const computed = window.getComputedStyle(content);
     const fromSize = details.open ? computed.getPropertyValue('block-size') : '0';
     let animation = this.animations[index];
-    if (animation) {
-      animation.cancel();
-    }
+    animation?.cancel();
     if (open) {
       details.open = true;
     }
@@ -181,5 +182,16 @@ export default class Disclosure {
       return;
     }
     this.toggle(details, false);
+  }
+
+  destroy() {
+    if (this.destroyed) {
+      return;
+    }
+    this.rootElement.removeAttribute('data-disclosure-initialized');
+    this.animations.forEach(animation => animation?.cancel());
+    this.animations = [];
+    this.eventController.abort();
+    this.destroyed = true;
   }
 }

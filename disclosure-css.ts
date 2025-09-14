@@ -3,6 +3,8 @@ export default class Disclosure {
   private detailsElements!: HTMLDetailsElement[];
   private summaryElements!: HTMLElement[];
   private contentElements!: HTMLElement[];
+  private eventController!: AbortController;
+  private destroyed!: boolean;
 
   constructor(root: HTMLElement) {
     if (!root) {
@@ -13,6 +15,8 @@ export default class Disclosure {
     this.detailsElements = [...this.rootElement.querySelectorAll(`details${NOT_NESTED}`)] as HTMLDetailsElement[];
     this.summaryElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED}`)] as HTMLElement[];
     this.contentElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`)] as HTMLElement[];
+    this.eventController = new AbortController();
+    this.destroyed = false;
     this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
     this.initialize();
   }
@@ -21,12 +25,13 @@ export default class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
+    const { signal } = this.eventController;
     this.summaryElements.forEach((summary, i) => {
       if (!this.isFocusable(this.detailsElements[i])) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('keydown', this.handleSummaryKeyDown);
+      summary.addEventListener('keydown', this.handleSummaryKeyDown, { signal });
     });
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
@@ -95,5 +100,14 @@ export default class Disclosure {
       return;
     }
     this.toggle(details, false);
+  }
+
+  destroy() {
+    if (this.destroyed) {
+      return;
+    }
+    this.rootElement.removeAttribute('data-disclosure-initialized');
+    this.eventController.abort();
+    this.destroyed = true;
   }
 }
