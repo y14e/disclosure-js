@@ -189,8 +189,6 @@ export default class Disclosure {
       return;
     }
     this.rootElement.removeAttribute('data-disclosure-initialized');
-    this.animations.forEach(animation => animation?.cancel());
-    this.animations = [];
     this.eventController.abort();
     this.destroyed = true;
   }
