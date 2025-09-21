@@ -34,10 +34,12 @@ export default class Disclosure {
       this.settings.animation.duration = 0;
     }
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.detailsElements = [...this.rootElement.querySelectorAll(`details${NOT_NESTED}`)] as HTMLDetailsElement[];
-    this.summaryElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED}`)] as HTMLElement[];
-    this.contentElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`)] as HTMLElement[];
+    this.detailsElements = [...this.rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`)];
+    this.summaryElements = [...this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`)];
+    this.contentElements = [...this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`)];
     this.animations = Array(this.detailsElements.length).fill(null);
+    this.eventController = new AbortController();
+    this.destroyed = false;
     this.handleSummaryClick = this.handleSummaryClick.bind(this);
     this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
     this.initialize();
@@ -73,7 +75,7 @@ export default class Disclosure {
 
   private getActiveElement(): HTMLElement | null {
     let active: Element | null = document.activeElement;
-    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
+    while (active && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
     }
     return active instanceof HTMLElement ? active : null;
@@ -90,7 +92,7 @@ export default class Disclosure {
     const name = details.getAttribute('data-disclosure-name');
     if (name) {
       details.removeAttribute('name');
-      const current = this.rootElement.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open]`) as HTMLDetailsElement;
+      const current = this.rootElement.querySelector<HTMLDetailsElement>(`details[data-disclosure-name="${name}"][data-disclosure-open]`);
       if (open && current && current !== details) {
         this.close(current);
       }
@@ -133,7 +135,11 @@ export default class Disclosure {
   private handleSummaryClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    const details = this.detailsElements[this.summaryElements.indexOf(event.currentTarget as HTMLElement)];
+    const summary = event.currentTarget;
+    if (!(summary instanceof HTMLElement)) {
+      return;
+    }
+    const details = this.detailsElements[this.summaryElements.indexOf(summary)];
     this.toggle(details, !details.hasAttribute('data-disclosure-open'));
   }
 

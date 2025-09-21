@@ -58,7 +58,7 @@ export default class Disclosure {
 
   getActiveElement() {
     let active = document.activeElement;
-    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
+    while (active && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
     }
     return active instanceof HTMLElement ? active : null;
@@ -118,7 +118,11 @@ export default class Disclosure {
   handleSummaryClick(event) {
     event.preventDefault();
     event.stopPropagation();
-    const details = this.detailsElements[this.summaryElements.indexOf(event.currentTarget)];
+    const summary = event.currentTarget;
+    if (!(summary instanceof HTMLElement)) {
+      return;
+    }
+    const details = this.detailsElements[this.summaryElements.indexOf(summary)];
     this.toggle(details, !details.hasAttribute('data-disclosure-open'));
   }
 

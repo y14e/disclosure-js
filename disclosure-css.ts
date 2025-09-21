@@ -12,9 +12,9 @@ export default class Disclosure {
     }
     this.rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.detailsElements = [...this.rootElement.querySelectorAll(`details${NOT_NESTED}`)] as HTMLDetailsElement[];
-    this.summaryElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED}`)] as HTMLElement[];
-    this.contentElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`)] as HTMLElement[];
+    this.detailsElements = [...this.rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`)];
+    this.summaryElements = [...this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`)];
+    this.contentElements = [...this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`)];
     this.eventController = new AbortController();
     this.destroyed = false;
     this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
@@ -38,7 +38,7 @@ export default class Disclosure {
 
   private getActiveElement(): HTMLElement | null {
     let active: Element | null = document.activeElement;
-    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
+    while (active && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
     }
     return active instanceof HTMLElement ? active : null;
