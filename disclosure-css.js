@@ -63,7 +63,7 @@ export default class Disclosure {
       return;
     }
     const currentIndex = focusables.indexOf(current);
-    let newIndex;
+    let newIndex = currentIndex;
     switch (key) {
       case 'End':
         newIndex = length - 1;

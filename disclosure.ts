@@ -123,7 +123,11 @@ export default class Disclosure {
     animation.addEventListener('finish', () => {
       this.animations[index] = null;
       if (name) {
-        details.setAttribute('name', details.getAttribute('data-disclosure-name')!);
+        const _name = details.getAttribute('data-disclosure-name');
+        if (!_name) {
+          return;
+        }
+        details.setAttribute('name', _name);
       }
       if (!open) {
         details.open = false;
@@ -158,7 +162,7 @@ export default class Disclosure {
       return;
     }
     const currentIndex = focusables.indexOf(current);
-    let newIndex!: number;
+    let newIndex = currentIndex;
     switch (key) {
       case 'End':
         newIndex = length - 1;
