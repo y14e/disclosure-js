@@ -123,11 +123,7 @@ export default class Disclosure {
     animation.addEventListener('finish', () => {
       this.animations[index] = null;
       if (name) {
-        const _name = details.getAttribute('data-disclosure-name');
-        if (!_name) {
-          return;
-        }
-        details.setAttribute('name', _name);
+        details.setAttribute('name', details.getAttribute('data-disclosure-name') || '');
       }
       if (!open) {
         details.open = false;
@@ -141,7 +137,7 @@ export default class Disclosure {
     event.stopPropagation();
     const summary = event.currentTarget;
     if (!(summary instanceof HTMLElement)) {
-      return;
+      throw new TypeError();
     }
     const details = this.detailsElements[this.summaryElements.indexOf(summary)];
     this.toggle(details, !details.hasAttribute('data-disclosure-open'));
