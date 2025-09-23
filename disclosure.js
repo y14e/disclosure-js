@@ -61,7 +61,7 @@ export default class Disclosure {
     while (active && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
     }
-    return active instanceof HTMLElement ? active : null;
+    return active;
   }
 
   isFocusable(element) {
@@ -118,11 +118,7 @@ export default class Disclosure {
   handleSummaryClick(event) {
     event.preventDefault();
     event.stopPropagation();
-    const summary = event.currentTarget;
-    if (!(summary instanceof HTMLElement)) {
-      throw new TypeError();
-    }
-    const details = this.detailsElements[this.summaryElements.indexOf(summary)];
+    const details = this.detailsElements[this.summaryElements.indexOf(event.currentTarget)];
     this.toggle(details, !details.hasAttribute('data-disclosure-open'));
   }
 
@@ -135,12 +131,7 @@ export default class Disclosure {
     event.stopPropagation();
     const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
     const length = focusables.length;
-    const active = this.getActiveElement();
-    const current = active instanceof HTMLElement ? active : null;
-    if (!current) {
-      return;
-    }
-    const currentIndex = focusables.indexOf(current);
+    const currentIndex = focusables.indexOf(this.getActiveElement());
     let newIndex = currentIndex;
     switch (key) {
       case 'End':
@@ -160,17 +151,15 @@ export default class Disclosure {
   }
 
   open(details) {
-    if (!this.detailsElements.includes(details)) {
-      return;
+    if (this.detailsElements.includes(details)) {
+      this.toggle(details, true);
     }
-    this.toggle(details, true);
   }
 
   close(details) {
-    if (!this.detailsElements.includes(details)) {
-      return;
+    if (this.detailsElements.includes(details)) {
+      this.toggle(details, false);
     }
-    this.toggle(details, false);
   }
 
   destroy() {

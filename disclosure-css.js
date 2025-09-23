@@ -34,7 +34,7 @@ export default class Disclosure {
     while (active && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
     }
-    return active instanceof HTMLElement ? active : null;
+    return active;
   }
 
   isFocusable(element) {
@@ -42,10 +42,9 @@ export default class Disclosure {
   }
 
   toggle(details, open) {
-    if (open === details.open) {
-      return;
+    if (open !== details.open) {
+      details.open = open;
     }
-    details.open = open;
   }
 
   handleSummaryKeyDown(event) {
@@ -57,12 +56,7 @@ export default class Disclosure {
     event.stopPropagation();
     const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
     const length = focusables.length;
-    const active = this.getActiveElement();
-    const current = active instanceof HTMLElement ? active : null;
-    if (!current) {
-      return;
-    }
-    const currentIndex = focusables.indexOf(current);
+    const currentIndex = focusables.indexOf(this.getActiveElement());
     let newIndex = currentIndex;
     switch (key) {
       case 'End':
@@ -82,17 +76,15 @@ export default class Disclosure {
   }
 
   open(details) {
-    if (!this.detailsElements.includes(details)) {
-      return;
+    if (this.detailsElements.includes(details)) {
+      this.toggle(details, true);
     }
-    this.toggle(details, true);
   }
 
   close(details) {
-    if (!this.detailsElements.includes(details)) {
-      return;
+    if (this.detailsElements.includes(details)) {
+      this.toggle(details, false);
     }
-    this.toggle(details, false);
   }
 
   destroy() {
