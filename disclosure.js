@@ -40,9 +40,7 @@ export default class Disclosure {
       function setData() {
         details.toggleAttribute('data-disclosure-open', details.open);
       }
-      new MutationObserver(setData).observe(details, {
-        attributeFilter: ['open'],
-      });
+      new MutationObserver(setData).observe(details, { attributeFilter: ['open'] });
       setData();
     });
     this.summaryElements.forEach((summary, i) => {
@@ -95,9 +93,7 @@ export default class Disclosure {
     });
     content.style.setProperty('overflow', 'clip');
     animation = this.animations[index] = content.animate(
-      {
-        blockSize: [fromSize, `${Math.max(parseFloat(computed.getPropertyValue('min-block-size')), Math.min(toSize, parseFloat(computed.getPropertyValue('max-block-size')) || toSize))}px`],
-      },
+      { blockSize: [fromSize, `${Math.max(parseFloat(computed.getPropertyValue('min-block-size')), Math.min(toSize, parseFloat(computed.getPropertyValue('max-block-size')) || toSize))}px`] },
       {
         duration: this.settings.animation.duration,
         easing: this.settings.animation.easing,
