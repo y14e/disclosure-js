@@ -1,8 +1,6 @@
 export default class Disclosure {
   constructor(root, options) {
-    if (!root) {
-      return;
-    }
+    if (!root) return;
     this.rootElement = root;
     this.defaults = {
       animation: {
@@ -10,12 +8,8 @@ export default class Disclosure {
         easing: 'ease',
       },
     };
-    this.settings = {
-      animation: { ...this.defaults.animation, ...options?.animation },
-    };
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      this.settings.animation.duration = 0;
-    }
+    this.settings = { animation: { ...this.defaults.animation, ...options?.animation } };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) this.settings.animation.duration = 0;
     const NOT_NESTED = ':not(:scope summary + * *)';
     this.detailsElements = [...this.rootElement.querySelectorAll(`details${NOT_NESTED}`)];
     this.summaryElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED}`)];
@@ -29,17 +23,11 @@ export default class Disclosure {
   }
 
   initialize() {
-    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
-      return;
-    }
+    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
     const { signal } = this.eventController;
     this.detailsElements.forEach(details => {
-      if (details.name) {
-        details.setAttribute('data-disclosure-name', details.name);
-      }
-      function setData() {
-        details.toggleAttribute('data-disclosure-open', details.open);
-      }
+      if (details.name) details.setAttribute('data-disclosure-name', details.name);
+      const setData = () => details.toggleAttribute('data-disclosure-open', details.open);
       new MutationObserver(setData).observe(details, { attributeFilter: ['open'] });
       setData();
     });
@@ -56,9 +44,7 @@ export default class Disclosure {
 
   getActiveElement() {
     let active = document.activeElement;
-    while (active && active.shadowRoot?.activeElement) {
-      active = active.shadowRoot.activeElement;
-    }
+    while (active && active.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
     return active;
   }
 
@@ -67,16 +53,12 @@ export default class Disclosure {
   }
 
   toggle(details, open) {
-    if (open === details.hasAttribute('data-disclosure-open')) {
-      return;
-    }
+    if (open === details.hasAttribute('data-disclosure-open')) return;
     const name = details.getAttribute('data-disclosure-name');
     if (name) {
       details.removeAttribute('name');
       const current = this.rootElement.querySelector(`details[data-disclosure-name="${name}"][data-disclosure-open]`);
-      if (open && current && current !== details) {
-        this.close(current);
-      }
+      if (open && current && current !== details) this.close(current);
     }
     const index = this.detailsElements.indexOf(details);
     const content = this.contentElements[index];
@@ -84,13 +66,9 @@ export default class Disclosure {
     const fromSize = details.open ? computed.getPropertyValue('block-size') : '0';
     let animation = this.animations[index];
     animation?.cancel();
-    if (open) {
-      details.open = true;
-    }
+    if (open) details.open = true;
     const toSize = open ? parseFloat(computed.getPropertyValue('block-size')) : 0;
-    window.requestAnimationFrame(() => {
-      details.toggleAttribute('data-disclosure-open', open);
-    });
+    window.requestAnimationFrame(() => details.toggleAttribute('data-disclosure-open', open));
     content.style.setProperty('overflow', 'clip');
     animation = this.animations[index] = content.animate(
       { blockSize: [fromSize, `${Math.max(parseFloat(computed.getPropertyValue('min-block-size')), Math.min(toSize, parseFloat(computed.getPropertyValue('max-block-size')) || toSize))}px`] },
@@ -101,12 +79,8 @@ export default class Disclosure {
     );
     animation.addEventListener('finish', () => {
       this.animations[index] = null;
-      if (name) {
-        details.setAttribute('name', details.getAttribute('data-disclosure-name') || '');
-      }
-      if (!open) {
-        details.open = false;
-      }
+      if (name) details.setAttribute('name', details.getAttribute('data-disclosure-name') || '');
+      if (!open) details.open = false;
       ['block-size', 'overflow'].forEach(name => content.style.removeProperty(name));
     });
   }
@@ -120,9 +94,7 @@ export default class Disclosure {
 
   handleSummaryKeyDown(event) {
     const { key } = event;
-    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) {
-      return;
-    }
+    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
     event.preventDefault();
     event.stopPropagation();
     const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
@@ -147,21 +119,15 @@ export default class Disclosure {
   }
 
   open(details) {
-    if (this.detailsElements.includes(details)) {
-      this.toggle(details, true);
-    }
+    if (this.detailsElements.includes(details)) this.toggle(details, true);
   }
 
   close(details) {
-    if (this.detailsElements.includes(details)) {
-      this.toggle(details, false);
-    }
+    if (this.detailsElements.includes(details)) this.toggle(details, false);
   }
 
   destroy() {
-    if (this.destroyed) {
-      return;
-    }
+    if (this.destroyed) return;
     this.rootElement.removeAttribute('data-disclosure-initialized');
     this.eventController.abort();
     this.destroyed = true;
