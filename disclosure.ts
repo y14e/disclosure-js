@@ -1,9 +1,9 @@
-type DisclosureOptions = {
+interface DisclosureOptions {
   animation: {
     duration: number;
     easing: string;
   };
-};
+}
 
 export default class Disclosure {
   private rootElement!: HTMLElement;
