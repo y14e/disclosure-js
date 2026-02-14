@@ -27,7 +27,9 @@ export default class Disclosure {
     const { signal } = this.eventController;
     this.detailsElements.forEach(details => {
       if (details.name) details.setAttribute('data-disclosure-name', details.name);
-      const setData = () => details.toggleAttribute('data-disclosure-open', details.open);
+      const setData = () => {
+        details.toggleAttribute('data-disclosure-open', details.open);
+      };
       new MutationObserver(setData).observe(details, { attributeFilter: ['open'] });
       setData();
     });
