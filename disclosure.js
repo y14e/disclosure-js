@@ -25,7 +25,7 @@ export default class Disclosure {
   initialize() {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
     const { signal } = this.eventController;
-    this.detailsElements.forEach(details => {
+    this.detailsElements.forEach((details) => {
       if (details.name) details.setAttribute('data-disclosure-name', details.name);
       const setData = () => {
         details.toggleAttribute('data-disclosure-open', details.open);
@@ -83,7 +83,7 @@ export default class Disclosure {
       this.animations[index] = null;
       if (name) details.setAttribute('name', details.getAttribute('data-disclosure-name') || '');
       if (!open) details.open = false;
-      ['block-size', 'overflow'].forEach(name => content.style.removeProperty(name));
+      ['block-size', 'overflow'].forEach((name) => content.style.removeProperty(name));
     });
   }
 
