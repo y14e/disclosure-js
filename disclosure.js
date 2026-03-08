@@ -19,6 +19,7 @@ export default class Disclosure {
     this.summaryElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED}`)];
     this.contentElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`)];
     this.animations = Array(this.detailsElements.length).fill(null);
+    this.observers = [];
     this.eventController = new AbortController();
     this.destroyed = false;
     this.handleSummaryClick = this.handleSummaryClick.bind(this);
@@ -38,7 +39,9 @@ export default class Disclosure {
       const setData = () => {
         details.toggleAttribute('data-disclosure-open', details.open);
       };
-      new MutationObserver(setData).observe(details, { attributeFilter: ['open'] });
+      const observer = new MutationObserver(setData);
+      observer.observe(details, { attributeFilter: ['open'] });
+      this.observers.push(observer);
       setData();
     });
     this.summaryElements.forEach((summary, i) => {
@@ -159,6 +162,7 @@ export default class Disclosure {
       return;
     }
     this.rootElement.removeAttribute('data-disclosure-initialized');
+    this.observers.forEach((observer) => observer.disconnect());
     this.eventController.abort();
     this.destroyed = true;
   }
