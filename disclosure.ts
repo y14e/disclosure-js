@@ -98,7 +98,7 @@ export default class Disclosure {
     }
     const index = this.detailsElements.indexOf(details);
     const content = this.contentElements[index];
-    const computed = window.getComputedStyle(content);
+    const computed = getComputedStyle(content);
     const start = details.open ? computed.getPropertyValue('block-size') : '0';
     let animation = this.animations[index];
     animation?.cancel();
