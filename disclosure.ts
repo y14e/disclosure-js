@@ -106,7 +106,7 @@ export default class Disclosure {
       details.open = true;
     }
     const end = open ? parseFloat(computed.getPropertyValue('block-size')) : 0;
-    window.requestAnimationFrame(() => details.toggleAttribute('data-disclosure-open', open));
+    requestAnimationFrame(() => details.toggleAttribute('data-disclosure-open', open));
     content.style.setProperty('overflow', 'clip');
     animation = this.animations[index] = content.animate(
       { blockSize: [start, `${Math.max(parseFloat(computed.getPropertyValue('min-block-size')), Math.min(end, parseFloat(computed.getPropertyValue('max-block-size')) || end))}px`] },
