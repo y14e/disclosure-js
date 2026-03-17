@@ -81,18 +81,18 @@ export default class Disclosure {
     }
     const index = this.detailsElements.indexOf(details);
     const content = this.contentElements[index];
-    const computed = getComputedStyle(content);
-    const start = details.open ? computed.getPropertyValue('block-size') : '0';
+    const style = getComputedStyle(content);
+    const start = details.open ? style.getPropertyValue('block-size') : '0';
     let animation = this.animations[index];
     animation?.cancel();
     if (open) {
       details.open = true;
     }
-    const end = open ? parseFloat(computed.getPropertyValue('block-size')) : 0;
+    const end = open ? parseFloat(style.getPropertyValue('block-size')) : 0;
     requestAnimationFrame(() => details.toggleAttribute('data-disclosure-open', open));
     content.style.setProperty('overflow', 'clip');
     animation = this.animations[index] = content.animate(
-      { blockSize: [start, `${Math.max(parseFloat(computed.getPropertyValue('min-block-size')), Math.min(end, parseFloat(computed.getPropertyValue('max-block-size')) || end))}px`] },
+      { blockSize: [start, `${Math.max(parseFloat(style.getPropertyValue('min-block-size')), Math.min(end, parseFloat(style.getPropertyValue('max-block-size')) || end))}px`] },
       {
         duration: this.settings.animation.duration,
         easing: this.settings.animation.easing,
