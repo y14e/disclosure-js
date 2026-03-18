@@ -96,8 +96,8 @@ export default class Disclosure {
     if (this.destroyed) {
       return;
     }
+    this.destroyed = true;
     this.rootElement.removeAttribute('data-disclosure-initialized');
     this.eventController.abort();
-    this.destroyed = true;
   }
 }
