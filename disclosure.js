@@ -163,22 +163,18 @@ export default class Disclosure {
     }
     this.destroyed = true;
     this.rootElement.removeAttribute('data-disclosure-initialized');
-    const animations = this.animations.filter(Boolean);
-    if (animations.length) {
-      await Promise.all(
-        animations.map(async (animation) => {
-          if (animation) {
-            try {
-              await animation.finished;
-            } catch {}
-            animation.cancel();
-          }
-        }),
-      );
-    }
-    this.animations = [];
+    await Promise.all(
+      this.animations.map(async (animation) => {
+        if (!animation) {
+          return;
+        }
+        try {
+          await animation.finished;
+        } catch {}
+        animation.cancel();
+      }),
+    );
     this.observers.forEach((observer) => observer.disconnect());
-    this.observers = [];
     this.eventController.abort();
   }
 }
