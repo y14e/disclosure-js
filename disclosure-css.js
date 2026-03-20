@@ -8,7 +8,7 @@ export default class Disclosure {
     this.detailsElements = [...this.rootElement.querySelectorAll(`details${NOT_NESTED}`)];
     this.summaryElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED}`)];
     this.contentElements = [...this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`)];
-    this.eventController = new AbortController();
+    this.controller = new AbortController();
     this.destroyed = false;
     this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
     this.initialize();
@@ -18,7 +18,7 @@ export default class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
-    const { signal } = this.eventController;
+    const { signal } = this.controller;
     this.summaryElements.forEach((summary, i) => {
       if (!this.isFocusable(this.detailsElements[i])) {
         summary.setAttribute('tabindex', '-1');
@@ -93,6 +93,6 @@ export default class Disclosure {
     }
     this.destroyed = true;
     this.rootElement.removeAttribute('data-disclosure-initialized');
-    this.eventController.abort();
+    this.controller.abort();
   }
 }

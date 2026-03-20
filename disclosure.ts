@@ -14,7 +14,7 @@ export default class Disclosure {
   private contentElements!: HTMLElement[];
   private animations!: (Animation | null)[];
   private observers!: MutationObserver[];
-  private eventController!: AbortController;
+  private controller!: AbortController;
   private destroyed!: boolean;
 
   constructor(root: HTMLElement, options?: Partial<DisclosureOptions>) {
@@ -37,7 +37,7 @@ export default class Disclosure {
     this.summaryElements = [...this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`)];
     this.contentElements = [...this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`)];
     this.animations = Array(this.detailsElements.length).fill(null);
-    this.eventController = new AbortController();
+    this.controller = new AbortController();
     this.destroyed = false;
     this.handleSummaryClick = this.handleSummaryClick.bind(this);
     this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
@@ -48,7 +48,7 @@ export default class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
       return;
     }
-    const { signal } = this.eventController;
+    const { signal } = this.controller;
     this.detailsElements.forEach((details) => {
       if (details.name) {
         details.setAttribute('data-disclosure-name', details.name);
@@ -180,6 +180,8 @@ export default class Disclosure {
     }
     this.destroyed = true;
     this.rootElement.removeAttribute('data-disclosure-initialized');
+    this.observers.forEach((observer) => observer.disconnect());
+    this.controller.abort();
     await Promise.all(
       this.animations.map(async (animation) => {
         if (!animation) {
@@ -191,7 +193,5 @@ export default class Disclosure {
         animation.cancel();
       }),
     );
-    this.observers.forEach((observer) => observer.disconnect());
-    this.eventController.abort();
   }
 }
