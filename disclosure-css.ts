@@ -92,7 +92,7 @@ export default class Disclosure {
     }
   }
 
-  destroy() {
+  destroy(): void {
     if (this.destroyed) {
       return;
     }
