@@ -174,7 +174,7 @@ export default class Disclosure {
     }
   }
 
-  async destroy() {
+  async destroy(): Promise<void> {
     if (this.destroyed) {
       return;
     }
