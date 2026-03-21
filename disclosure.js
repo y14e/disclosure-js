@@ -164,6 +164,7 @@ export default class Disclosure {
     this.destroyed = true;
     this.rootElement.removeAttribute('data-disclosure-initialized');
     this.controller.abort();
+    this.observers.forEach((observer) => observer.disconnect());
     const animations = this.animations;
     if (!force) {
       await Promise.all(animations.map((animation) => animation?.finished.catch(() => {})));
