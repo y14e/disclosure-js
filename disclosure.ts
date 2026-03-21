@@ -174,24 +174,17 @@ export default class Disclosure {
     }
   }
 
-  async destroy(): Promise<void> {
+  async destroy(force = false): Promise<void> {
     if (this.destroyed) {
       return;
     }
     this.destroyed = true;
     this.rootElement.removeAttribute('data-disclosure-initialized');
-    this.observers.forEach((observer) => observer.disconnect());
     this.controller.abort();
-    await Promise.all(
-      this.animations.map(async (animation) => {
-        if (!animation) {
-          return;
-        }
-        try {
-          await animation.finished;
-        } catch {}
-        animation.cancel();
-      }),
-    );
+    const animations = this.animations;
+    if (!force) {
+      await Promise.all(animations.map((animation) => animation?.finished.catch(() => {})));
+    }
+    animations.forEach((animation) => animation?.cancel());
   }
 }
