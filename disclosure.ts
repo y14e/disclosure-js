@@ -17,7 +17,7 @@ export default class Disclosure {
   private controller!: AbortController;
   private destroyed!: boolean;
 
-  constructor(root: HTMLElement, options?: Partial<DisclosureOptions>) {
+  constructor(root: HTMLElement, options: Partial<DisclosureOptions> = {}) {
     if (!root) {
       return;
     }
@@ -28,7 +28,7 @@ export default class Disclosure {
         easing: 'ease',
       },
     };
-    this.settings = { animation: { ...this.defaults.animation, ...options?.animation } };
+    this.settings = { animation: { ...this.defaults.animation, ...options.animation } };
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
       this.settings.animation.duration = 0;
     }
