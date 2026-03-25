@@ -118,7 +118,7 @@ export default class Disclosure {
     animation.addEventListener('finish', () => {
       this.animations[index] = null;
       if (name) {
-        details.setAttribute('name', details.getAttribute('data-disclosure-name') || '');
+        details.setAttribute('name', details.getAttribute('data-disclosure-name') ?? '');
       }
       if (!open) {
         details.open = false;
