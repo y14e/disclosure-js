@@ -36,9 +36,7 @@ export default class Disclosure {
       if (details.name) {
         details.setAttribute('data-disclosure-name', details.name);
       }
-      const setData = () => {
-        details.toggleAttribute('data-disclosure-open', details.open);
-      };
+      const setData = () => details.toggleAttribute('data-disclosure-open', details.open);
       const observer = new MutationObserver(setData);
       observer.observe(details, { attributeFilter: ['open'] });
       this.observers.push(observer);
