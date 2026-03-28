@@ -23,7 +23,7 @@ export default class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
     const { signal } = this.controller;
     this.summaryElements.forEach((summary, i) => {
-      if (!this.isFocusable(this.detailsElements[i])) {
+      if (!Disclosure.isFocusable(this.detailsElements[i])) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
@@ -32,7 +32,7 @@ export default class Disclosure {
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  private getActiveElement(): HTMLElement | null {
+  private static getActiveElement(): HTMLElement | null {
     let active = document.activeElement;
     while (active && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
@@ -40,11 +40,11 @@ export default class Disclosure {
     return active as HTMLElement | null;
   }
 
-  private isFocusable(element: HTMLElement): boolean {
+  private static isFocusable(element: HTMLElement): boolean {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 
-  private toggle(details: HTMLDetailsElement, open: boolean): void {
+  private static toggle(details: HTMLDetailsElement, open: boolean): void {
     if (open !== details.open) details.open = open;
   }
 
@@ -53,9 +53,9 @@ export default class Disclosure {
     if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
     event.preventDefault();
     event.stopPropagation();
-    const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
-    const length = focusables.length;
-    const currentIndex = focusables.indexOf(this.getActiveElement()!);
+    const focusables = this.summaryElements.filter((_, i) => Disclosure.isFocusable(this.detailsElements[i]));
+    const { length } = focusables;
+    const currentIndex = focusables.indexOf(Disclosure.getActiveElement()!);
     let newIndex = currentIndex;
     switch (key) {
       case 'End':
@@ -70,19 +70,21 @@ export default class Disclosure {
       case 'ArrowDown':
         newIndex = (currentIndex + 1) % length;
         break;
+      default:
+        break;
     }
     focusables[newIndex].focus();
   }
 
   open(details: HTMLDetailsElement): void {
     if (this.detailsElements.includes(details)) {
-      this.toggle(details, true);
+      Disclosure.toggle(details, true);
     }
   }
 
   close(details: HTMLDetailsElement): void {
     if (this.detailsElements.includes(details)) {
-      this.toggle(details, false);
+      Disclosure.toggle(details, false);
     }
   }
 

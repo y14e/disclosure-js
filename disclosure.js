@@ -41,7 +41,7 @@ export default class Disclosure {
       setData();
     });
     this.summaryElements.forEach((summary, i) => {
-      if (!this.isFocusable(this.detailsElements[i])) {
+      if (!Disclosure.isFocusable(this.detailsElements[i])) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
@@ -51,7 +51,7 @@ export default class Disclosure {
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  getActiveElement() {
+  static getActiveElement() {
     let active = document.activeElement;
     while (active && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
@@ -59,7 +59,7 @@ export default class Disclosure {
     return active;
   }
 
-  isFocusable(element) {
+  static isFocusable(element) {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 
@@ -85,13 +85,14 @@ export default class Disclosure {
     const endSize = open ? parseFloat(style.getPropertyValue('block-size')) : 0;
     requestAnimationFrame(() => details.toggleAttribute('data-disclosure-open', open));
     content.style.setProperty('overflow', 'clip');
-    animation = this.animations[index] = content.animate(
+    this.animations[index] = content.animate(
       { blockSize: [startSize, `${Math.max(parseFloat(style.getPropertyValue('min-block-size')), Math.min(endSize, parseFloat(style.getPropertyValue('max-block-size')) || endSize))}px`] },
       {
         duration: this.settings.animation.duration,
         easing: this.settings.animation.easing,
       },
     );
+    animation = this.animations[index];
     animation.addEventListener('finish', () => {
       this.animations[index] = null;
       if (name) {
@@ -100,7 +101,7 @@ export default class Disclosure {
       if (!open) {
         details.open = false;
       }
-      ['block-size', 'overflow'].forEach((name) => content.style.removeProperty(name));
+      ['block-size', 'overflow'].forEach((n) => content.style.removeProperty(n));
     });
   }
 
@@ -116,9 +117,9 @@ export default class Disclosure {
     if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
     event.preventDefault();
     event.stopPropagation();
-    const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
-    const length = focusables.length;
-    const currentIndex = focusables.indexOf(this.getActiveElement());
+    const focusables = this.summaryElements.filter((_, i) => Disclosure.isFocusable(this.detailsElements[i]));
+    const { length } = focusables;
+    const currentIndex = focusables.indexOf(Disclosure.getActiveElement());
     let newIndex = currentIndex;
     switch (key) {
       case 'End':
@@ -132,6 +133,8 @@ export default class Disclosure {
         break;
       case 'ArrowDown':
         newIndex = (currentIndex + 1) % length;
+        break;
+      default:
         break;
     }
     focusables[newIndex].focus();
