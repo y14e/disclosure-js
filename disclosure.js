@@ -1,8 +1,6 @@
 export default class Disclosure {
   constructor(root, options = {}) {
-    if (!root) {
-      return;
-    }
+    if (!root) return;
     this.rootElement = root;
     this.defaults = {
       animation: {
@@ -28,9 +26,7 @@ export default class Disclosure {
   }
 
   initialize() {
-    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
-      return;
-    }
+    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
     const { signal } = this.controller;
     this.detailsElements.forEach((details) => {
       if (details.name) {
@@ -68,9 +64,7 @@ export default class Disclosure {
   }
 
   toggle(details, open) {
-    if (open === details.hasAttribute('data-disclosure-open')) {
-      return;
-    }
+    if (open === details.hasAttribute('data-disclosure-open')) return;
     const name = details.getAttribute('data-disclosure-name');
     if (name) {
       details.removeAttribute('name');
@@ -119,9 +113,7 @@ export default class Disclosure {
 
   handleSummaryKeyDown(event) {
     const { key } = event;
-    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) {
-      return;
-    }
+    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
     event.preventDefault();
     event.stopPropagation();
     const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
@@ -158,9 +150,7 @@ export default class Disclosure {
   }
 
   async destroy(force = false) {
-    if (this.destroyed) {
-      return;
-    }
+    if (this.destroyed) return;
     this.destroyed = true;
     this.rootElement.removeAttribute('data-disclosure-initialized');
     this.controller.abort();

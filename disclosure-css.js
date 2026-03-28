@@ -1,8 +1,6 @@
 export default class Disclosure {
   constructor(root) {
-    if (!root) {
-      return;
-    }
+    if (!root) return;
     this.rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
     this.detailsElements = [...this.rootElement.querySelectorAll(`details${NOT_NESTED}`)];
@@ -15,9 +13,7 @@ export default class Disclosure {
   }
 
   initialize() {
-    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) {
-      return;
-    }
+    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
     const { signal } = this.controller;
     this.summaryElements.forEach((summary, i) => {
       if (!this.isFocusable(this.detailsElements[i])) {
@@ -49,9 +45,7 @@ export default class Disclosure {
 
   handleSummaryKeyDown(event) {
     const { key } = event;
-    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) {
-      return;
-    }
+    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
     event.preventDefault();
     event.stopPropagation();
     const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
@@ -88,9 +82,7 @@ export default class Disclosure {
   }
 
   destroy() {
-    if (this.destroyed) {
-      return;
-    }
+    if (this.destroyed) return;
     this.destroyed = true;
     this.rootElement.removeAttribute('data-disclosure-initialized');
     this.controller.abort();
