@@ -118,7 +118,7 @@ export default class Disclosure {
       if (!open) {
         details.open = false;
       }
-      ['block-size', 'overflow'].forEach((name) => void content.style.removeProperty(name));
+      ['block-size', 'overflow'].forEach((name) => content.style.removeProperty(name));
     });
   }
 
@@ -172,10 +172,10 @@ export default class Disclosure {
     this.destroyed = true;
     this.rootElement.removeAttribute('data-disclosure-initialized');
     this.controller.abort();
-    this.observers.forEach((observer) => void observer.disconnect());
+    this.observers.forEach((observer) => observer.disconnect());
     if (!force) {
       await Promise.all(this.animations.map((animation) => animation?.finished.catch(() => {})));
     }
-    this.animations.forEach((animation) => void animation?.cancel());
+    this.animations.forEach((animation) => animation?.cancel());
   }
 }
