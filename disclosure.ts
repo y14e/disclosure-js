@@ -58,7 +58,7 @@ export default class Disclosure {
       setData();
     });
     this.summaryElements.forEach((summary, i) => {
-      if (!Disclosure.isFocusable(this.detailsElements[i])) {
+      if (!this.isFocusable(this.detailsElements[i])) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
@@ -68,15 +68,15 @@ export default class Disclosure {
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  private static getActiveElement(): HTMLElement | null {
+  private getActiveElement(): HTMLElement | null {
     let active = document.activeElement;
-    while (active && active.shadowRoot?.activeElement) {
+    while (active?.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
     }
     return active as HTMLElement | null;
   }
 
-  private static isFocusable(element: HTMLElement): boolean {
+  private isFocusable(element: HTMLElement): boolean {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 
@@ -118,7 +118,7 @@ export default class Disclosure {
       if (!open) {
         details.open = false;
       }
-      ['block-size', 'overflow'].forEach((n) => content.style.removeProperty(n));
+      ['block-size', 'overflow'].forEach((name) => void content.style.removeProperty(name));
     });
   }
 
@@ -134,9 +134,9 @@ export default class Disclosure {
     if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
     event.preventDefault();
     event.stopPropagation();
-    const focusables = this.summaryElements.filter((_, i) => Disclosure.isFocusable(this.detailsElements[i]));
+    const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
     const { length } = focusables;
-    const currentIndex = focusables.indexOf(Disclosure.getActiveElement()!);
+    const currentIndex = focusables.indexOf(this.getActiveElement() as HTMLElement);
     let newIndex = currentIndex;
     switch (key) {
       case 'End':
@@ -174,10 +174,10 @@ export default class Disclosure {
     this.destroyed = true;
     this.rootElement.removeAttribute('data-disclosure-initialized');
     this.controller.abort();
-    this.observers.forEach((observer) => observer.disconnect());
+    this.observers.forEach((observer) => void observer.disconnect());
     if (!force) {
       await Promise.all(this.animations.map((animation) => animation?.finished.catch(() => {})));
     }
-    this.animations.forEach((animation) => animation?.cancel());
+    this.animations.forEach((animation) => void animation?.cancel());
   }
 }

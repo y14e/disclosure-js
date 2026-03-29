@@ -23,7 +23,7 @@ export default class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
     const { signal } = this.controller;
     this.summaryElements.forEach((summary, i) => {
-      if (!Disclosure.isFocusable(this.detailsElements[i])) {
+      if (!this.isFocusable(this.detailsElements[i])) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
@@ -32,19 +32,19 @@ export default class Disclosure {
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  private static getActiveElement(): HTMLElement | null {
+  private getActiveElement(): HTMLElement | null {
     let active = document.activeElement;
-    while (active && active.shadowRoot?.activeElement) {
+    while (active?.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
     }
     return active as HTMLElement | null;
   }
 
-  private static isFocusable(element: HTMLElement): boolean {
+  private isFocusable(element: HTMLElement): boolean {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 
-  private static toggle(details: HTMLDetailsElement, open: boolean): void {
+  private toggle(details: HTMLDetailsElement, open: boolean): void {
     if (open !== details.open) details.open = open;
   }
 
@@ -53,9 +53,9 @@ export default class Disclosure {
     if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
     event.preventDefault();
     event.stopPropagation();
-    const focusables = this.summaryElements.filter((_, i) => Disclosure.isFocusable(this.detailsElements[i]));
+    const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
     const { length } = focusables;
-    const currentIndex = focusables.indexOf(Disclosure.getActiveElement()!);
+    const currentIndex = focusables.indexOf(this.getActiveElement() as HTMLElement);
     let newIndex = currentIndex;
     switch (key) {
       case 'End':
@@ -78,13 +78,13 @@ export default class Disclosure {
 
   open(details: HTMLDetailsElement): void {
     if (this.detailsElements.includes(details)) {
-      Disclosure.toggle(details, true);
+      this.toggle(details, true);
     }
   }
 
   close(details: HTMLDetailsElement): void {
     if (this.detailsElements.includes(details)) {
-      Disclosure.toggle(details, false);
+      this.toggle(details, false);
     }
   }
 
