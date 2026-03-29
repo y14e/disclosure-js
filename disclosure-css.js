@@ -65,8 +65,6 @@ export default class Disclosure {
       case 'ArrowDown':
         newIndex = (currentIndex + 1) % length;
         break;
-      default:
-        break;
     }
     focusables[newIndex].focus();
   }
