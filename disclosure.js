@@ -93,14 +93,14 @@ export default class Disclosure {
       },
     );
     this.animations[index] = animation;
-    const cleanup = () => {
+    const cleanupAnimation = () => {
       if (this.animations[index] === animation) {
         this.animations[index] = null;
       }
     };
-    animation.addEventListener('cancel', cleanup);
+    animation.addEventListener('cancel', cleanupAnimation);
     animation.addEventListener('finish', () => {
-      cleanup();
+      cleanupAnimation();
       if (name) {
         details.setAttribute('name', details.getAttribute('data-disclosure-name') ?? '');
       }
