@@ -70,10 +70,10 @@ export default class Disclosure {
 
   private getActiveElement(): HTMLElement | null {
     let active = document.activeElement;
-    while (active?.shadowRoot?.activeElement) {
+    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
     }
-    return active as HTMLElement | null;
+    return active instanceof HTMLElement ? active : null;
   }
 
   private isFocusable(element: HTMLElement): boolean {
@@ -131,7 +131,9 @@ export default class Disclosure {
   private handleSummaryClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    const details = this.detailsElements[this.summaryElements.indexOf(event.currentTarget as HTMLElement)];
+    const summary = event.currentTarget;
+    if (!(summary instanceof HTMLElement)) return;
+    const details = this.detailsElements[this.summaryElements.indexOf(summary)];
     this.toggle(details, !details.hasAttribute('data-disclosure-open'));
   }
 
@@ -141,24 +143,25 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
-    const { length } = focusables;
-    const currentIndex = focusables.indexOf(this.getActiveElement() as HTMLElement);
+    const active = this.getActiveElement();
+    if (!active) return;
+    const currentIndex = focusables.indexOf(active);
     let newIndex = currentIndex;
     switch (key) {
       case 'End':
-        newIndex = length - 1;
+        newIndex = -1;
         break;
       case 'Home':
         newIndex = 0;
         break;
       case 'ArrowUp':
-        newIndex = (currentIndex - 1 + length) % length;
+        newIndex = currentIndex - 1;
         break;
       case 'ArrowDown':
-        newIndex = (currentIndex + 1) % length;
+        newIndex = (currentIndex + 1) % focusables.length;
         break;
     }
-    focusables[newIndex].focus();
+    focusables.at(newIndex)?.focus();
   }
 
   open(details: HTMLDetailsElement): void {

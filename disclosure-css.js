@@ -27,10 +27,10 @@ export default class Disclosure {
 
   getActiveElement() {
     let active = document.activeElement;
-    while (active?.shadowRoot?.activeElement) {
+    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
     }
-    return active;
+    return active instanceof HTMLElement ? active : null;
   }
 
   isFocusable(element) {
@@ -38,9 +38,7 @@ export default class Disclosure {
   }
 
   toggle(details, open) {
-    if (open !== details.open) {
-      details.open = open;
-    }
+    if (open !== details.open) details.open = open;
   }
 
   handleSummaryKeyDown(event) {
@@ -49,24 +47,25 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
-    const { length } = focusables;
-    const currentIndex = focusables.indexOf(this.getActiveElement());
+    const active = this.getActiveElement();
+    if (!active) return;
+    const currentIndex = focusables.indexOf(active);
     let newIndex = currentIndex;
     switch (key) {
       case 'End':
-        newIndex = length - 1;
+        newIndex = -1;
         break;
       case 'Home':
         newIndex = 0;
         break;
       case 'ArrowUp':
-        newIndex = (currentIndex - 1 + length) % length;
+        newIndex = currentIndex - 1;
         break;
       case 'ArrowDown':
-        newIndex = (currentIndex + 1) % length;
+        newIndex = (currentIndex + 1) % focusables.length;
         break;
     }
-    focusables[newIndex].focus();
+    focusables.at(newIndex)?.focus();
   }
 
   open(details) {
