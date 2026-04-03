@@ -1,8 +1,8 @@
 export default class Disclosure {
   private rootElement!: HTMLElement;
-  private detailsElements!: HTMLDetailsElement[];
-  private summaryElements!: HTMLElement[];
-  private contentElements!: HTMLElement[];
+  private detailsElements!: NodeListOf<HTMLDetailsElement>;
+  private summaryElements!: NodeListOf<HTMLElement>;
+  private contentElements!: NodeListOf<HTMLElement>;
   private controller!: AbortController;
   private destroyed!: boolean;
 
@@ -10,9 +10,9 @@ export default class Disclosure {
     if (!root) return;
     this.rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.detailsElements = [...this.rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`)];
-    this.summaryElements = [...this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`)];
-    this.contentElements = [...this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`)];
+    this.detailsElements = this.rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`);
+    this.summaryElements = this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`);
+    this.contentElements = this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`);
     this.controller = new AbortController();
     this.destroyed = false;
     this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
@@ -23,7 +23,8 @@ export default class Disclosure {
     if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
     const { signal } = this.controller;
     this.summaryElements.forEach((summary, i) => {
-      if (!this.isFocusable(this.detailsElements[i])) {
+      const details = this.detailsElements[i];
+      if (!this.isFocusable(details)) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
@@ -45,7 +46,9 @@ export default class Disclosure {
   }
 
   private toggle(details: HTMLDetailsElement, open: boolean): void {
-    if (open !== details.open) details.open = open;
+    if (open !== details.open) {
+      details.open = open;
+    }
   }
 
   private handleSummaryKeyDown(event: KeyboardEvent): void {
@@ -53,7 +56,12 @@ export default class Disclosure {
     if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
     event.preventDefault();
     event.stopPropagation();
-    const focusables = this.summaryElements.filter((_, i) => this.isFocusable(this.detailsElements[i]));
+    const focusables: HTMLElement[] = [];
+    this.summaryElements.forEach((summary, i) => {
+      if (this.isFocusable(this.detailsElements[i])) {
+        focusables.push(summary);
+      }
+    });
     const active = this.getActiveElement();
     if (!active) return;
     const currentIndex = focusables.indexOf(active);
@@ -76,14 +84,20 @@ export default class Disclosure {
   }
 
   open(details: HTMLDetailsElement): void {
-    if (this.detailsElements.includes(details)) {
-      this.toggle(details, true);
+    for (let i = 0; i < this.detailsElements.length; i++) {
+      if (this.detailsElements[i] === details) {
+        this.toggle(details, true);
+        return;
+      }
     }
   }
 
   close(details: HTMLDetailsElement): void {
-    if (this.detailsElements.includes(details)) {
-      this.toggle(details, false);
+    for (let i = 0; i < this.detailsElements.length; i++) {
+      if (this.detailsElements[i] === details) {
+        this.toggle(details, false);
+        return;
+      }
     }
   }
 
