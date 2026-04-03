@@ -6,6 +6,7 @@ export default class Disclosure {
     this.detailsElements = this.rootElement.querySelectorAll(`details${NOT_NESTED}`);
     this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
+    this.entries = new WeakMap();
     this.controller = new AbortController();
     this.destroyed = false;
     this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
@@ -22,6 +23,15 @@ export default class Disclosure {
         summary.style.setProperty('pointer-events', 'none');
       }
       summary.addEventListener('keydown', this.handleSummaryKeyDown, { signal });
+    });
+    this.detailsElements.forEach((details, i) => {
+      const summary = this.summaryElements[i];
+      const content = this.contentElements[i];
+      if (!summary || !content) return;
+      const entry = { animation: null, content, details, summary };
+      this.entries.set(details, entry);
+      this.entries.set(summary, entry);
+      this.entries.set(content, entry);
     });
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
@@ -50,8 +60,9 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const focusables = [];
-    this.summaryElements.forEach((summary, i) => {
-      if (this.isFocusable(this.detailsElements[i])) {
+    this.summaryElements.forEach((summary) => {
+      const entry = this.entries.get(summary);
+      if (entry && this.isFocusable(entry.details)) {
         focusables.push(summary);
       }
     });
@@ -77,20 +88,14 @@ export default class Disclosure {
   }
 
   open(details) {
-    for (let i = 0; i < this.detailsElements.length; i++) {
-      if (this.detailsElements[i] === details) {
-        this.toggle(details, true);
-        return;
-      }
+    if (this.entries.has(details)) {
+      this.toggle(details, true);
     }
   }
 
   close(details) {
-    for (let i = 0; i < this.detailsElements.length; i++) {
-      if (this.detailsElements[i] === details) {
-        this.toggle(details, false);
-        return;
-      }
+    if (this.entries.has(details)) {
+      this.toggle(details, false);
     }
   }
 
