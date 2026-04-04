@@ -1,47 +1,55 @@
+type DisclosureEntry = {
+  details: HTMLDetailsElement;
+  summary: HTMLElement;
+  content: HTMLElement;
+};
+
 export default class Disclosure {
-  private rootElement!: HTMLElement;
-  private detailsElements!: NodeListOf<HTMLDetailsElement>;
-  private summaryElements!: NodeListOf<HTMLElement>;
-  private contentElements!: NodeListOf<HTMLElement>;
-  private entries!: WeakMap<HTMLElement, { animation: Animation | null; content: HTMLElement; details: HTMLDetailsElement; summary: HTMLElement }>;
-  private controller!: AbortController;
-  private destroyed!: boolean;
+  private readonly rootElement: HTMLElement;
+  private readonly detailsElements: NodeListOf<HTMLDetailsElement>;
+  private readonly summaryElements: NodeListOf<HTMLElement>;
+  private readonly contentElements: NodeListOf<HTMLElement>;
+  private readonly entries: WeakMap<HTMLElement, DisclosureEntry> = new WeakMap();
+  private readonly controller = new AbortController();
+  private destroyed = false;
 
   constructor(root: HTMLElement) {
-    if (!root) return;
+    if (!root) throw new Error('Root element missing');
     this.rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
     this.detailsElements = this.rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`);
     this.summaryElements = this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`);
-    this.entries = new WeakMap();
-    this.controller = new AbortController();
-    this.destroyed = false;
-    this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
+    if (this.detailsElements.length === 0 || this.summaryElements.length === 0 || this.contentElements.length === 0) throw new Error('Details, summary, or content element missing');
     this.initialize();
   }
 
   private initialize(): void {
-    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
     const { signal } = this.controller;
-    this.summaryElements.forEach((summary, i) => {
+    for (let i = 0; i < this.summaryElements.length; i++) {
+      const summary = this.summaryElements[i];
       const details = this.detailsElements[i];
       if (!this.isFocusable(details)) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('keydown', this.handleSummaryKeyDown, { signal });
-    });
-    this.detailsElements.forEach((details, i) => {
+      summary.addEventListener('keydown', this.handleSummaryKeyDown.bind(this), { signal });
+    }
+    for (let i = 0; i < this.detailsElements.length; i++) {
+      const details = this.detailsElements[i];
       const summary = this.summaryElements[i];
       const content = this.contentElements[i];
-      if (!summary || !content) return;
-      const entry = { animation: null, content, details, summary };
+      if (!summary || !content) continue;
+      const entry = this.createEntry(details, summary, content);
       this.entries.set(details, entry);
       this.entries.set(summary, entry);
       this.entries.set(content, entry);
-    });
+    }
     this.rootElement.setAttribute('data-disclosure-initialized', '');
+  }
+
+  private createEntry(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): DisclosureEntry {
+    return { details, summary, content };
   }
 
   private getActiveElement(): HTMLElement | null {
@@ -68,12 +76,12 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const focusables: HTMLElement[] = [];
-    this.summaryElements.forEach((summary) => {
+    for (const summary of this.summaryElements) {
       const entry = this.entries.get(summary);
       if (entry && this.isFocusable(entry.details)) {
         focusables.push(summary);
       }
-    });
+    }
     const active = this.getActiveElement();
     if (!active) return;
     const currentIndex = focusables.indexOf(active);
@@ -110,7 +118,7 @@ export default class Disclosure {
   destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
-    this.rootElement.removeAttribute('data-disclosure-initialized');
     this.controller.abort();
+    this.rootElement.removeAttribute('data-disclosure-initialized');
   }
 }

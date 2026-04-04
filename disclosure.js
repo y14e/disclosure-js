@@ -1,6 +1,6 @@
 export default class Disclosure {
   constructor(root, options = {}) {
-    if (!root) return;
+    if (!root) throw new Error('Root element missing');
     this.rootElement = root;
     this.defaults = {
       animation: {
@@ -16,19 +16,17 @@ export default class Disclosure {
     this.detailsElements = this.rootElement.querySelectorAll(`details${NOT_NESTED}`);
     this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
+    if (this.detailsElements.length === 0 || this.summaryElements.length === 0 || this.contentElements.length === 0) throw new Error('Details, summary, or content element missing');
     this.entries = new WeakMap();
-    this.controller = new AbortController();
     this.observers = [];
+    this.controller = new AbortController();
     this.destroyed = false;
-    this.handleSummaryClick = this.handleSummaryClick.bind(this);
-    this.handleSummaryKeyDown = this.handleSummaryKeyDown.bind(this);
     this.initialize();
   }
 
   initialize() {
-    if (!this.detailsElements.length || !this.summaryElements.length || !this.contentElements.length) return;
     const { signal } = this.controller;
-    this.detailsElements.forEach((details) => {
+    for (const details of this.detailsElements) {
       if (details.name) {
         details.setAttribute('data-disclosure-name', details.name);
       }
@@ -39,25 +37,31 @@ export default class Disclosure {
       observer.observe(details, { attributeFilter: ['open'] });
       this.observers.push(observer);
       setData();
-    });
-    this.summaryElements.forEach((summary, i) => {
+    }
+    for (let i = 0; i < this.summaryElements.length; i++) {
+      const summary = this.summaryElements[i];
       if (!this.isFocusable(this.detailsElements[i])) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('click', this.handleSummaryClick, { signal });
-      summary.addEventListener('keydown', this.handleSummaryKeyDown, { signal });
-    });
-    this.detailsElements.forEach((details, i) => {
+      summary.addEventListener('click', this.handleSummaryClick.bind(this), { signal });
+      summary.addEventListener('keydown', this.handleSummaryKeyDown.bind(this), { signal });
+    }
+    for (let i = 0; i < this.detailsElements.length; i++) {
+      const details = this.detailsElements[i];
       const summary = this.summaryElements[i];
       const content = this.contentElements[i];
-      if (!summary || !content) return;
-      const entry = { animation: null, content, details, summary };
+      if (!summary || !content) continue;
+      const entry = this.createEntry(details, summary, content);
       this.entries.set(details, entry);
       this.entries.set(summary, entry);
       this.entries.set(content, entry);
-    });
+    }
     this.rootElement.setAttribute('data-disclosure-initialized', '');
+  }
+
+  createEntry(details, summary, content) {
+    return { details, summary, content, animation: null };
   }
 
   getActiveElement() {
@@ -137,12 +141,12 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const focusables = [];
-    this.summaryElements.forEach((summary) => {
+    for (const summary of this.summaryElements) {
       const entry = this.entries.get(summary);
       if (entry && this.isFocusable(entry.details)) {
         focusables.push(summary);
       }
-    });
+    }
     const active = this.getActiveElement();
     if (!active) return;
     const currentIndex = focusables.indexOf(active);
@@ -179,18 +183,20 @@ export default class Disclosure {
   async destroy(force = false) {
     if (this.destroyed) return;
     this.destroyed = true;
-    this.rootElement.removeAttribute('data-disclosure-initialized');
     this.controller.abort();
+    this.rootElement.removeAttribute('data-disclosure-initialized');
     if (!force) {
       const promises = [];
-      this.detailsElements.forEach((details) => {
+      for (const details of this.detailsElements) {
         const entry = this.entries.get(details);
         if (entry?.animation) {
           promises.push(entry.animation.finished.catch(() => {}).then(() => {}));
         }
-      });
+      }
       await Promise.all(promises);
     }
-    this.detailsElements.forEach((details) => this.entries.get(details)?.animation?.cancel());
+    for (const details of this.detailsElements) {
+      this.entries.get(details)?.animation?.cancel();
+    }
   }
 }
