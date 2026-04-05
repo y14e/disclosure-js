@@ -24,18 +24,37 @@ export default class Disclosure {
     this.initialize();
   }
 
+  open(details: HTMLDetailsElement): void {
+    if (this.entries.has(details)) {
+      this.toggle(details, true);
+    }
+  }
+
+  close(details: HTMLDetailsElement): void {
+    if (this.entries.has(details)) {
+      this.toggle(details, false);
+    }
+  }
+
+  destroy(): void {
+    if (this.destroyed) return;
+    this.destroyed = true;
+    this.controller.abort();
+    this.rootElement.removeAttribute('data-disclosure-initialized');
+  }
+
   private initialize(): void {
     const { signal } = this.controller;
-    for (let i = 0; i < this.summaryElements.length; i++) {
+    for (let i = 0, l = this.summaryElements.length; i < l; i++) {
       const summary = this.summaryElements[i];
       const details = this.detailsElements[i];
       if (!this.isFocusable(details)) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('keydown', this.handleSummaryKeyDown.bind(this), { signal });
+      summary.addEventListener('keydown', this.handleSummaryKeyDown, { signal });
     }
-    for (let i = 0; i < this.detailsElements.length; i++) {
+    for (let i = 0, l = this.detailsElements.length; i < l; i++) {
       const details = this.detailsElements[i];
       const summary = this.summaryElements[i];
       const content = this.contentElements[i];
@@ -48,29 +67,7 @@ export default class Disclosure {
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  private createEntry(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): DisclosureEntry {
-    return { details, summary, content };
-  }
-
-  private getActiveElement(): HTMLElement | null {
-    let active = document.activeElement;
-    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
-      active = active.shadowRoot.activeElement;
-    }
-    return active instanceof HTMLElement ? active : null;
-  }
-
-  private isFocusable(element: HTMLElement): boolean {
-    return element.getAttribute('aria-disabled') !== 'true';
-  }
-
-  private toggle(details: HTMLDetailsElement, open: boolean): void {
-    if (open !== details.open) {
-      details.open = open;
-    }
-  }
-
-  private handleSummaryKeyDown(event: KeyboardEvent): void {
+  private handleSummaryKeyDown = (event: KeyboardEvent): void => {
     const { key } = event;
     if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
     event.preventDefault();
@@ -101,24 +98,27 @@ export default class Disclosure {
         break;
     }
     focusables.at(newIndex)?.focus();
-  }
+  };
 
-  open(details: HTMLDetailsElement): void {
-    if (this.entries.has(details)) {
-      this.toggle(details, true);
+  private toggle(details: HTMLDetailsElement, open: boolean): void {
+    if (open !== details.open) {
+      details.open = open;
     }
   }
 
-  close(details: HTMLDetailsElement): void {
-    if (this.entries.has(details)) {
-      this.toggle(details, false);
-    }
+  private createEntry(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): DisclosureEntry {
+    return { details, summary, content };
   }
 
-  destroy(): void {
-    if (this.destroyed) return;
-    this.destroyed = true;
-    this.controller.abort();
-    this.rootElement.removeAttribute('data-disclosure-initialized');
+  private getActiveElement(): HTMLElement | null {
+    let active = document.activeElement;
+    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
+      active = active.shadowRoot.activeElement;
+    }
+    return active instanceof HTMLElement ? active : null;
+  }
+
+  private isFocusable(element: HTMLElement): boolean {
+    return element.getAttribute('aria-disabled') !== 'true';
   }
 }

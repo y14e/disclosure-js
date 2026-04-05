@@ -24,6 +24,38 @@ export default class Disclosure {
     this.initialize();
   }
 
+  open(details) {
+    if (this.entries.has(details)) {
+      this.toggle(details, true);
+    }
+  }
+
+  close(details) {
+    if (this.entries.has(details)) {
+      this.toggle(details, false);
+    }
+  }
+
+  async destroy(force = false) {
+    if (this.destroyed) return;
+    this.destroyed = true;
+    this.controller.abort();
+    this.rootElement.removeAttribute('data-disclosure-initialized');
+    if (!force) {
+      const promises = [];
+      for (const details of this.detailsElements) {
+        const entry = this.entries.get(details);
+        if (entry?.animation) {
+          promises.push(entry.animation.finished.catch(() => {}).then(() => {}));
+        }
+      }
+      await Promise.all(promises);
+    }
+    for (const details of this.detailsElements) {
+      this.entries.get(details)?.animation?.cancel();
+    }
+  }
+
   initialize() {
     const { signal } = this.controller;
     for (const details of this.detailsElements) {
@@ -38,16 +70,16 @@ export default class Disclosure {
       this.observers.push(observer);
       setData();
     }
-    for (let i = 0; i < this.summaryElements.length; i++) {
+    for (let i = 0, l = this.summaryElements.length; i < l; i++) {
       const summary = this.summaryElements[i];
       if (!this.isFocusable(this.detailsElements[i])) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('click', this.handleSummaryClick.bind(this), { signal });
-      summary.addEventListener('keydown', this.handleSummaryKeyDown.bind(this), { signal });
+      summary.addEventListener('click', this.handleSummaryClick, { signal });
+      summary.addEventListener('keydown', this.handleSummaryKeyDown, { signal });
     }
-    for (let i = 0; i < this.detailsElements.length; i++) {
+    for (let i = 0, l = this.detailsElements.length; i < l; i++) {
       const details = this.detailsElements[i];
       const summary = this.summaryElements[i];
       const content = this.contentElements[i];
@@ -60,21 +92,49 @@ export default class Disclosure {
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  createEntry(details, summary, content) {
-    return { details, summary, content, animation: null };
-  }
+  handleSummaryClick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const summary = event.currentTarget;
+    if (!(summary instanceof HTMLElement)) return;
+    const entry = this.entries.get(summary);
+    if (!entry) return;
+    const { details } = entry;
+    this.toggle(details, !details.hasAttribute('data-disclosure-open'));
+  };
 
-  getActiveElement() {
-    let active = document.activeElement;
-    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
-      active = active.shadowRoot.activeElement;
+  handleSummaryKeyDown = (event) => {
+    const { key } = event;
+    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const focusables = [];
+    for (const summary of this.summaryElements) {
+      const entry = this.entries.get(summary);
+      if (entry && this.isFocusable(entry.details)) {
+        focusables.push(summary);
+      }
     }
-    return active instanceof HTMLElement ? active : null;
-  }
-
-  isFocusable(element) {
-    return element.getAttribute('aria-disabled') !== 'true';
-  }
+    const active = this.getActiveElement();
+    if (!active) return;
+    const currentIndex = focusables.indexOf(active);
+    let newIndex = currentIndex;
+    switch (key) {
+      case 'End':
+        newIndex = -1;
+        break;
+      case 'Home':
+        newIndex = 0;
+        break;
+      case 'ArrowUp':
+        newIndex = currentIndex - 1;
+        break;
+      case 'ArrowDown':
+        newIndex = (currentIndex + 1) % focusables.length;
+        break;
+    }
+    focusables.at(newIndex)?.focus();
+  };
 
   toggle(details, open) {
     const entry = this.entries.get(details);
@@ -124,79 +184,19 @@ export default class Disclosure {
     });
   }
 
-  handleSummaryClick(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    const summary = event.currentTarget;
-    if (!(summary instanceof HTMLElement)) return;
-    const entry = this.entries.get(summary);
-    if (!entry) return;
-    const { details } = entry;
-    this.toggle(details, !details.hasAttribute('data-disclosure-open'));
+  createEntry(details, summary, content) {
+    return { details, summary, content, animation: null };
   }
 
-  handleSummaryKeyDown(event) {
-    const { key } = event;
-    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const focusables = [];
-    for (const summary of this.summaryElements) {
-      const entry = this.entries.get(summary);
-      if (entry && this.isFocusable(entry.details)) {
-        focusables.push(summary);
-      }
+  getActiveElement() {
+    let active = document.activeElement;
+    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
+      active = active.shadowRoot.activeElement;
     }
-    const active = this.getActiveElement();
-    if (!active) return;
-    const currentIndex = focusables.indexOf(active);
-    let newIndex = currentIndex;
-    switch (key) {
-      case 'End':
-        newIndex = -1;
-        break;
-      case 'Home':
-        newIndex = 0;
-        break;
-      case 'ArrowUp':
-        newIndex = currentIndex - 1;
-        break;
-      case 'ArrowDown':
-        newIndex = (currentIndex + 1) % focusables.length;
-        break;
-    }
-    focusables.at(newIndex)?.focus();
+    return active instanceof HTMLElement ? active : null;
   }
 
-  open(details) {
-    if (this.entries.has(details)) {
-      this.toggle(details, true);
-    }
-  }
-
-  close(details) {
-    if (this.entries.has(details)) {
-      this.toggle(details, false);
-    }
-  }
-
-  async destroy(force = false) {
-    if (this.destroyed) return;
-    this.destroyed = true;
-    this.controller.abort();
-    this.rootElement.removeAttribute('data-disclosure-initialized');
-    if (!force) {
-      const promises = [];
-      for (const details of this.detailsElements) {
-        const entry = this.entries.get(details);
-        if (entry?.animation) {
-          promises.push(entry.animation.finished.catch(() => {}).then(() => {}));
-        }
-      }
-      await Promise.all(promises);
-    }
-    for (const details of this.detailsElements) {
-      this.entries.get(details)?.animation?.cancel();
-    }
+  isFocusable(element) {
+    return element.getAttribute('aria-disabled') !== 'true';
   }
 }

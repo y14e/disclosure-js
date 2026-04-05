@@ -13,18 +13,37 @@ export default class Disclosure {
     this.initialize();
   }
 
+  open(details) {
+    if (this.entries.has(details)) {
+      this.toggle(details, true);
+    }
+  }
+
+  close(details) {
+    if (this.entries.has(details)) {
+      this.toggle(details, false);
+    }
+  }
+
+  destroy() {
+    if (this.destroyed) return;
+    this.destroyed = true;
+    this.controller.abort();
+    this.rootElement.removeAttribute('data-disclosure-initialized');
+  }
+
   initialize() {
     const { signal } = this.controller;
-    for (let i = 0; i < this.summaryElements.length; i++) {
+    for (let i = 0, l = this.summaryElements.length; i < l; i++) {
       const summary = this.summaryElements[i];
       const details = this.detailsElements[i];
       if (!this.isFocusable(details)) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('keydown', this.handleSummaryKeyDown.bind(this), { signal });
+      summary.addEventListener('keydown', this.handleSummaryKeyDown, { signal });
     }
-    for (let i = 0; i < this.detailsElements.length; i++) {
+    for (let i = 0, l = this.detailsElements.length; i < l; i++) {
       const details = this.detailsElements[i];
       const summary = this.summaryElements[i];
       const content = this.contentElements[i];
@@ -37,29 +56,7 @@ export default class Disclosure {
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  createEntry(details, summary, content) {
-    return { details, summary, content };
-  }
-
-  getActiveElement() {
-    let active = document.activeElement;
-    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
-      active = active.shadowRoot.activeElement;
-    }
-    return active instanceof HTMLElement ? active : null;
-  }
-
-  isFocusable(element) {
-    return element.getAttribute('aria-disabled') !== 'true';
-  }
-
-  toggle(details, open) {
-    if (open !== details.open) {
-      details.open = open;
-    }
-  }
-
-  handleSummaryKeyDown(event) {
+  handleSummaryKeyDown = (event) => {
     const { key } = event;
     if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
     event.preventDefault();
@@ -90,24 +87,27 @@ export default class Disclosure {
         break;
     }
     focusables.at(newIndex)?.focus();
-  }
+  };
 
-  open(details) {
-    if (this.entries.has(details)) {
-      this.toggle(details, true);
+  toggle(details, open) {
+    if (open !== details.open) {
+      details.open = open;
     }
   }
 
-  close(details) {
-    if (this.entries.has(details)) {
-      this.toggle(details, false);
-    }
+  createEntry(details, summary, content) {
+    return { details, summary, content };
   }
 
-  destroy() {
-    if (this.destroyed) return;
-    this.destroyed = true;
-    this.controller.abort();
-    this.rootElement.removeAttribute('data-disclosure-initialized');
+  getActiveElement() {
+    let active = document.activeElement;
+    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
+      active = active.shadowRoot.activeElement;
+    }
+    return active instanceof HTMLElement ? active : null;
+  }
+
+  isFocusable(element) {
+    return element.getAttribute('aria-disabled') !== 'true';
   }
 }
