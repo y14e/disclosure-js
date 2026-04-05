@@ -156,7 +156,8 @@ export default class Disclosure {
       details.open = true;
     }
     const endSize = open ? content.scrollHeight : 0;
-    requestAnimationFrame(() => details.toggleAttribute('data-disclosure-open', open));
+    content.offsetHeight;
+    details.toggleAttribute('data-disclosure-open', open);
     content.style.setProperty('overflow', 'clip');
     animation = content.animate(
       { blockSize: [`${startSize}px`, `${endSize}px`] },
