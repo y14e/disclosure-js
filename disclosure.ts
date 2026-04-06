@@ -179,13 +179,8 @@ export default class Disclosure {
     const endSize = open ? content.scrollHeight : 0;
     requestAnimationFrame(() => details.toggleAttribute('data-disclosure-open', open));
     content.style.setProperty('overflow', 'clip');
-    animation = content.animate(
-      { blockSize: [`${startSize}px`, `${endSize}px`] },
-      {
-        duration: this.settings.animation.duration,
-        easing: this.settings.animation.easing,
-      },
-    );
+    const { duration, easing } = this.settings.animation;
+    animation = content.animate({ blockSize: [`${startSize}px`, `${endSize}px`] }, { duration, easing });
     entry.animation = animation;
     const cleanupAnimation = () => {
       if (entry.animation === animation) {
