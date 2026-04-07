@@ -33,7 +33,7 @@ export default class Disclosure {
         easing: 'ease',
       },
     };
-    this.settings = { animation: { ...this.defaults.animation, ...options.animation } };
+    this.settings = { animation: { ...this.defaults.animation, ...(options.animation ?? {}) } };
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
       this.settings.animation.duration = 0;
     }
