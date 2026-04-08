@@ -18,7 +18,7 @@ export default class Disclosure {
     this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
     if (this.detailsElements.length === 0 || this.summaryElements.length === 0 || this.contentElements.length === 0) throw new Error('Details, summary, or content element missing');
     this.bindingMap = new WeakMap();
-    this.mutationObservers = [];
+    this.openAttributeObservers = [];
     this.eventController = new AbortController();
     this.destroyed = false;
     this.initialize();
@@ -54,7 +54,7 @@ export default class Disclosure {
     for (const details of this.detailsElements) {
       this.bindingMap.get(details)?.animation?.cancel();
     }
-    for (const observer of this.mutationObservers) {
+    for (const observer of this.openAttributeObservers) {
       observer.disconnect();
     }
   }
@@ -70,7 +70,7 @@ export default class Disclosure {
       };
       const observer = new MutationObserver(syncOpenAttribute);
       observer.observe(details, { attributeFilter: ['open'] });
-      this.mutationObservers.push(observer);
+      this.openAttributeObservers.push(observer);
       syncOpenAttribute();
     }
     for (let i = 0, l = this.summaryElements.length; i < l; i++) {

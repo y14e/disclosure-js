@@ -27,7 +27,7 @@ export default class Disclosure {
   private readonly summaryElements: NodeListOf<HTMLElement>;
   private readonly contentElements: NodeListOf<HTMLElement>;
   private readonly bindingMap: WeakMap<HTMLElement, DisclosureBinding> = new WeakMap();
-  private readonly mutationObservers: MutationObserver[] = [];
+  private readonly openAttributeObservers: MutationObserver[] = [];
   private readonly eventController = new AbortController();
   private destroyed = false;
 
@@ -76,7 +76,7 @@ export default class Disclosure {
     for (const details of this.detailsElements) {
       this.bindingMap.get(details)?.animation?.cancel();
     }
-    for (const observer of this.mutationObservers) {
+    for (const observer of this.openAttributeObservers) {
       observer.disconnect();
     }
   }
@@ -92,7 +92,7 @@ export default class Disclosure {
       };
       const observer = new MutationObserver(syncOpenAttribute);
       observer.observe(details, { attributeFilter: ['open'] });
-      this.mutationObservers.push(observer);
+      this.openAttributeObservers.push(observer);
       syncOpenAttribute();
     }
     for (let i = 0, l = this.summaryElements.length; i < l; i++) {
