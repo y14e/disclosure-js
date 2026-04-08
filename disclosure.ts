@@ -4,6 +4,7 @@ interface DisclosureOptions {
     easing?: string;
   };
 }
+
 type DeepRequired<T> = T extends (...args: unknown[]) => unknown ? T : T extends readonly unknown[] ? { [K in keyof T]: DeepRequired<NonNullable<T[K]>> } : T extends object ? { [K in keyof T]-?: DeepRequired<NonNullable<T[K]>> } : NonNullable<T>;
 
 type DisclosureBinding = {
