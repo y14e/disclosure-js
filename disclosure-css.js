@@ -7,20 +7,20 @@ export default class Disclosure {
     this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
     if (this.detailsElements.length === 0 || this.summaryElements.length === 0 || this.contentElements.length === 0) throw new Error('Details, summary, or content element missing');
-    this.entries = new WeakMap();
-    this.controller = new AbortController();
+    this.bindingMap = new WeakMap();
+    this.eventController = new AbortController();
     this.destroyed = false;
     this.initialize();
   }
 
   open(details) {
-    if (this.entries.has(details)) {
+    if (this.bindingMap.has(details)) {
       this.toggle(details, true);
     }
   }
 
   close(details) {
-    if (this.entries.has(details)) {
+    if (this.bindingMap.has(details)) {
       this.toggle(details, false);
     }
   }
@@ -28,12 +28,12 @@ export default class Disclosure {
   destroy() {
     if (this.destroyed) return;
     this.destroyed = true;
-    this.controller.abort();
+    this.eventController.abort();
     this.rootElement.removeAttribute('data-disclosure-initialized');
   }
 
   initialize() {
-    const { signal } = this.controller;
+    const { signal } = this.eventController;
     for (let i = 0, l = this.summaryElements.length; i < l; i++) {
       const summary = this.summaryElements[i];
       const details = this.detailsElements[i];
@@ -48,10 +48,10 @@ export default class Disclosure {
       const summary = this.summaryElements[i];
       const content = this.contentElements[i];
       if (!summary || !content) continue;
-      const entry = this.createEntry(details, summary, content);
-      this.entries.set(details, entry);
-      this.entries.set(summary, entry);
-      this.entries.set(content, entry);
+      const binding = this.createBinding(details, summary, content);
+      this.bindingMap.set(details, binding);
+      this.bindingMap.set(summary, binding);
+      this.bindingMap.set(content, binding);
     }
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
@@ -63,8 +63,8 @@ export default class Disclosure {
     event.stopPropagation();
     const focusables = [];
     for (const summary of this.summaryElements) {
-      const entry = this.entries.get(summary);
-      if (entry && this.isFocusable(entry.details)) {
+      const binding = this.bindingMap.get(summary);
+      if (binding && this.isFocusable(binding.details)) {
         focusables.push(summary);
       }
     }
@@ -95,7 +95,7 @@ export default class Disclosure {
     }
   }
 
-  createEntry(details, summary, content) {
+  createBinding(details, summary, content) {
     return { details, summary, content };
   }
 

@@ -17,21 +17,21 @@ export default class Disclosure {
     this.summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
     if (this.detailsElements.length === 0 || this.summaryElements.length === 0 || this.contentElements.length === 0) throw new Error('Details, summary, or content element missing');
-    this.entries = new WeakMap();
-    this.observers = [];
-    this.controller = new AbortController();
+    this.bindingMap = new WeakMap();
+    this.mutationObservers = [];
+    this.eventController = new AbortController();
     this.destroyed = false;
     this.initialize();
   }
 
   open(details) {
-    if (this.entries.has(details)) {
+    if (this.bindingMap.has(details)) {
       this.toggle(details, true);
     }
   }
 
   close(details) {
-    if (this.entries.has(details)) {
+    if (this.bindingMap.has(details)) {
       this.toggle(details, false);
     }
   }
@@ -39,36 +39,39 @@ export default class Disclosure {
   async destroy(force = false) {
     if (this.destroyed) return;
     this.destroyed = true;
-    this.controller.abort();
+    this.eventController.abort();
     this.rootElement.removeAttribute('data-disclosure-initialized');
     if (!force) {
       const promises = [];
       for (const details of this.detailsElements) {
-        const entry = this.entries.get(details);
-        if (entry?.animation) {
-          promises.push(entry.animation.finished.catch(() => {}).then(() => {}));
+        const binding = this.bindingMap.get(details);
+        if (binding?.animation) {
+          promises.push(binding.animation.finished.catch(() => {}).then(() => {}));
         }
       }
       await Promise.all(promises);
     }
     for (const details of this.detailsElements) {
-      this.entries.get(details)?.animation?.cancel();
+      this.bindingMap.get(details)?.animation?.cancel();
+    }
+    for (const observer of this.mutationObservers) {
+      observer.disconnect();
     }
   }
 
   initialize() {
-    const { signal } = this.controller;
+    const { signal } = this.eventController;
     for (const details of this.detailsElements) {
       if (details.name) {
         details.setAttribute('data-disclosure-name', details.name);
       }
-      const sync = () => {
+      const syncOpenAttr = () => {
         details.toggleAttribute('data-disclosure-open', details.open);
       };
-      const observer = new MutationObserver(sync);
+      const observer = new MutationObserver(syncOpenAttr);
       observer.observe(details, { attributeFilter: ['open'] });
-      this.observers.push(observer);
-      sync();
+      this.mutationObservers.push(observer);
+      syncOpenAttr();
     }
     for (let i = 0, l = this.summaryElements.length; i < l; i++) {
       const summary = this.summaryElements[i];
@@ -84,10 +87,10 @@ export default class Disclosure {
       const summary = this.summaryElements[i];
       const content = this.contentElements[i];
       if (!summary || !content) continue;
-      const entry = this.createEntry(details, summary, content);
-      this.entries.set(details, entry);
-      this.entries.set(summary, entry);
-      this.entries.set(content, entry);
+      const binding = this.createBinding(details, summary, content);
+      this.bindingMap.set(details, binding);
+      this.bindingMap.set(summary, binding);
+      this.bindingMap.set(content, binding);
     }
     this.rootElement.setAttribute('data-disclosure-initialized', '');
   }
@@ -97,9 +100,9 @@ export default class Disclosure {
     event.stopPropagation();
     const summary = event.currentTarget;
     if (!(summary instanceof HTMLElement)) return;
-    const entry = this.entries.get(summary);
-    if (!entry) return;
-    const { details } = entry;
+    const binding = this.bindingMap.get(summary);
+    if (!binding) return;
+    const { details } = binding;
     this.toggle(details, !details.hasAttribute('data-disclosure-open'));
   };
 
@@ -110,8 +113,8 @@ export default class Disclosure {
     event.stopPropagation();
     const focusables = [];
     for (const summary of this.summaryElements) {
-      const entry = this.entries.get(summary);
-      if (entry && this.isFocusable(entry.details)) {
+      const binding = this.bindingMap.get(summary);
+      if (binding && this.isFocusable(binding.details)) {
         focusables.push(summary);
       }
     }
@@ -137,8 +140,8 @@ export default class Disclosure {
   };
 
   toggle(details, open) {
-    const entry = this.entries.get(details);
-    if (!entry) return;
+    const binding = this.bindingMap.get(details);
+    if (!binding) return;
     if (open === details.hasAttribute('data-disclosure-open')) return;
     const name = details.getAttribute('data-disclosure-name');
     if (name) {
@@ -148,9 +151,9 @@ export default class Disclosure {
         this.close(current);
       }
     }
-    const { content } = entry;
+    const { content } = binding;
     const startSize = details.open ? content.offsetHeight : 0;
-    let { animation } = entry;
+    let { animation } = binding;
     animation?.cancel();
     if (open) {
       details.open = true;
@@ -160,10 +163,10 @@ export default class Disclosure {
     content.style.setProperty('overflow', 'clip');
     const { duration, easing } = this.settings.animation;
     animation = content.animate({ blockSize: [`${startSize}px`, `${endSize}px`] }, { duration, easing });
-    entry.animation = animation;
+    binding.animation = animation;
     const cleanupAnimation = () => {
-      if (entry.animation === animation) {
-        entry.animation = null;
+      if (binding.animation === animation) {
+        binding.animation = null;
       }
     };
     animation.addEventListener('cancel', cleanupAnimation);
@@ -179,7 +182,7 @@ export default class Disclosure {
     });
   }
 
-  createEntry(details, summary, content) {
+  createBinding(details, summary, content) {
     return { details, summary, content, animation: null };
   }
 
