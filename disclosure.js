@@ -65,13 +65,13 @@ export default class Disclosure {
       if (details.name) {
         details.setAttribute('data-disclosure-name', details.name);
       }
-      const syncOpenAttr = () => {
+      const syncOpenAttribute = () => {
         details.toggleAttribute('data-disclosure-open', details.open);
       };
-      const observer = new MutationObserver(syncOpenAttr);
+      const observer = new MutationObserver(syncOpenAttribute);
       observer.observe(details, { attributeFilter: ['open'] });
       this.mutationObservers.push(observer);
-      syncOpenAttr();
+      syncOpenAttribute();
     }
     for (let i = 0, l = this.summaryElements.length; i < l; i++) {
       const summary = this.summaryElements[i];
