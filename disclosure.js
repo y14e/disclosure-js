@@ -178,7 +178,8 @@ export default class Disclosure {
       if (!open) {
         details.open = false;
       }
-      ['block-size', 'overflow'].forEach((prop) => content.style.removeProperty(prop));
+      content.style.removeProperty('block-size');
+      content.style.removeProperty('overflow');
     });
   }
 
