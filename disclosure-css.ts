@@ -14,13 +14,17 @@ export default class Disclosure {
   private destroyed = false;
 
   constructor(root: HTMLElement) {
-    if (!root) throw new Error('Root element missing');
+    if (!root) {
+      throw new Error('Root element missing.');
+    }
     this.rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
     this.detailsElements = this.rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`);
     this.summaryElements = this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`);
     this.contentElements = this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`);
-    if (this.detailsElements.length === 0 || this.summaryElements.length === 0 || this.contentElements.length === 0) throw new Error('Details, summary, or content element missing');
+    if (this.detailsElements.length === 0 || this.summaryElements.length === 0 || this.contentElements.length === 0) {
+      throw new Error('Details, summary, or content element missing.');
+    }
     this.initialize();
   }
 
@@ -37,7 +41,9 @@ export default class Disclosure {
   }
 
   destroy(): void {
-    if (this.destroyed) return;
+    if (this.destroyed) {
+      return;
+    }
     this.destroyed = true;
     this.eventController.abort();
     this.rootElement.removeAttribute('data-disclosure-initialized');
@@ -58,7 +64,9 @@ export default class Disclosure {
       const details = this.detailsElements[i];
       const summary = this.summaryElements[i];
       const content = this.contentElements[i];
-      if (!summary || !content) continue;
+      if (!summary || !content) {
+        continue;
+      }
       const binding = this.createBinding(details, summary, content);
       this.bindingMap.set(details, binding);
       this.bindingMap.set(summary, binding);
@@ -69,7 +77,9 @@ export default class Disclosure {
 
   private handleSummaryKeyDown = (event: KeyboardEvent): void => {
     const { key } = event;
-    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) return;
+    if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) {
+      return;
+    }
     event.preventDefault();
     event.stopPropagation();
     const focusables: HTMLElement[] = [];
@@ -80,7 +90,9 @@ export default class Disclosure {
       }
     }
     const active = this.getActiveElement();
-    if (!active) return;
+    if (!active) {
+      return;
+    }
     const currentIndex = focusables.indexOf(active);
     let newIndex = currentIndex;
     switch (key) {
