@@ -5,77 +5,94 @@ type DisclosureBinding = {
 };
 
 export default class Disclosure {
-  private readonly rootElement: HTMLElement;
-  private readonly detailsElements: NodeListOf<HTMLDetailsElement>;
-  private readonly summaryElements: NodeListOf<HTMLElement>;
-  private readonly contentElements: NodeListOf<HTMLElement>;
-  private readonly bindingMap: WeakMap<HTMLElement, DisclosureBinding> = new WeakMap();
-  private readonly eventController = new AbortController();
-  private destroyed = false;
+  #rootElement: HTMLElement;
+  #detailsElements: NodeListOf<HTMLDetailsElement> | null;
+  #summaryElements: NodeListOf<HTMLElement> | null;
+  #contentElements: NodeListOf<HTMLElement> | null;
+  #bindings: WeakMap<HTMLElement, DisclosureBinding> | null = new WeakMap();
+  #controller: AbortController | null = new AbortController();
+  #destroyed = false;
 
   constructor(root: HTMLElement) {
     if (!root) {
       throw new Error('Root element missing.');
     }
-    this.rootElement = root;
+    this.#rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.detailsElements = this.rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`);
-    this.summaryElements = this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`);
-    this.contentElements = this.rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`);
-    if (this.detailsElements.length === 0 || this.summaryElements.length === 0 || this.contentElements.length === 0) {
+    this.#detailsElements = this.#rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`);
+    this.#summaryElements = this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`);
+    this.#contentElements = this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`);
+    if (this.#detailsElements.length === 0 || this.#summaryElements.length === 0 || this.#contentElements.length === 0) {
       throw new Error('Details, summary, or content element missing.');
     }
-    this.initialize();
+    this.#initialize();
   }
 
   open(details: HTMLDetailsElement): void {
-    if (this.bindingMap.has(details)) {
-      this.toggle(details, true);
+    if (this.#destroyed || !this.#bindings) {
+      return;
+    }
+    if (this.#bindings.has(details)) {
+      this.#toggle(details, true);
     }
   }
 
   close(details: HTMLDetailsElement): void {
-    if (this.bindingMap.has(details)) {
-      this.toggle(details, false);
+    if (this.#destroyed || !this.#bindings) {
+      return;
+    }
+    if (this.#bindings.has(details)) {
+      this.#toggle(details, false);
     }
   }
 
   destroy(): void {
-    if (this.destroyed) {
+    if (this.#destroyed) {
       return;
     }
-    this.destroyed = true;
-    this.eventController.abort();
-    this.rootElement.removeAttribute('data-disclosure-initialized');
+    this.#destroyed = true;
+    this.#controller?.abort();
+    this.#controller = null;
+    this.#rootElement.removeAttribute('data-disclosure-initialized');
+    this.#detailsElements = null;
+    this.#summaryElements = null;
+    this.#contentElements = null;
+    this.#bindings = null;
   }
 
-  private initialize(): void {
-    const { signal } = this.eventController;
-    for (let i = 0, l = this.summaryElements.length; i < l; i++) {
-      const summary = this.summaryElements[i];
-      const details = this.detailsElements[i];
-      if (!this.isFocusable(details)) {
+  #initialize(): void {
+    if (!this.#detailsElements || !this.#summaryElements || !this.#contentElements || !this.#bindings || !this.#controller) {
+      return;
+    }
+    const { signal } = this.#controller;
+    for (let i = 0, l = this.#summaryElements.length; i < l; i++) {
+      const summary = this.#summaryElements[i];
+      const details = this.#detailsElements[i];
+      if (!this.#isFocusable(details)) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('keydown', this.handleSummaryKeyDown, { signal });
+      summary.addEventListener('keydown', this.#handleSummaryKeyDown, { signal });
     }
-    for (let i = 0, l = this.detailsElements.length; i < l; i++) {
-      const details = this.detailsElements[i];
-      const summary = this.summaryElements[i];
-      const content = this.contentElements[i];
+    for (let i = 0, l = this.#detailsElements.length; i < l; i++) {
+      const details = this.#detailsElements[i];
+      const summary = this.#summaryElements[i];
+      const content = this.#contentElements[i];
       if (!summary || !content) {
         continue;
       }
-      const binding = this.createBinding(details, summary, content);
-      this.bindingMap.set(details, binding);
-      this.bindingMap.set(summary, binding);
-      this.bindingMap.set(content, binding);
+      const binding = this.#createBinding(details, summary, content);
+      this.#bindings.set(details, binding);
+      this.#bindings.set(summary, binding);
+      this.#bindings.set(content, binding);
     }
-    this.rootElement.setAttribute('data-disclosure-initialized', '');
+    this.#rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  private handleSummaryKeyDown = (event: KeyboardEvent): void => {
+  #handleSummaryKeyDown = (event: KeyboardEvent): void => {
+    if (!this.#summaryElements || !this.#bindings) {
+      return;
+    }
     const { key } = event;
     if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) {
       return;
@@ -83,13 +100,13 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const focusables: HTMLElement[] = [];
-    for (const summary of this.summaryElements) {
-      const binding = this.bindingMap.get(summary);
-      if (binding && this.isFocusable(binding.details)) {
+    for (const summary of this.#summaryElements) {
+      const binding = this.#bindings.get(summary);
+      if (binding && this.#isFocusable(binding.details)) {
         focusables.push(summary);
       }
     }
-    const active = this.getActiveElement();
+    const active = this.#getActiveElement();
     if (!active) {
       return;
     }
@@ -112,17 +129,17 @@ export default class Disclosure {
     focusables.at(newIndex)?.focus();
   };
 
-  private toggle(details: HTMLDetailsElement, open: boolean): void {
+  #toggle(details: HTMLDetailsElement, open: boolean): void {
     if (open !== details.open) {
       details.open = open;
     }
   }
 
-  private createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): DisclosureBinding {
+  #createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): DisclosureBinding {
     return { details, summary, content };
   }
 
-  private getActiveElement(): HTMLElement | null {
+  #getActiveElement(): HTMLElement | null {
     let active = document.activeElement;
     while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
@@ -130,7 +147,7 @@ export default class Disclosure {
     return active instanceof HTMLElement ? active : null;
   }
 
-  private isFocusable(element: HTMLElement): boolean {
+  #isFocusable(element: HTMLElement): boolean {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 }

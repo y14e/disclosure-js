@@ -11,74 +11,86 @@ type DisclosureBinding = {
   details: HTMLDetailsElement;
   summary: HTMLElement;
   content: HTMLElement;
+  timer: number | null;
   animation: Animation | null;
 };
 
 export default class Disclosure {
-  private readonly rootElement: HTMLElement;
-  private readonly defaults = {
+  #rootElement: HTMLElement;
+  #defaults = {
     animation: {
       duration: 300,
       easing: 'ease',
     },
   } satisfies DeepRequired<DisclosureOptions>;
-  private readonly settings: DeepRequired<DisclosureOptions>;
+  #settings: DeepRequired<DisclosureOptions>;
   #detailsElements: NodeListOf<HTMLDetailsElement> | null;
   #summaryElements: NodeListOf<HTMLElement> | null;
   #contentElements: NodeListOf<HTMLElement> | null;
   #bindings: WeakMap<HTMLElement, DisclosureBinding> | null = new WeakMap();
   #controller: AbortController | null = new AbortController();
-  private readonly observers: MutationObserver[] = [];
-  private destroyed = false;
+  #observers: MutationObserver[] | null = [];
+  #destroyed = false;
 
   constructor(root: HTMLElement, options: DisclosureOptions = {}) {
     if (!root) {
       throw new Error('Root element missing.');
     }
-    this.rootElement = root;
-    this.settings = { animation: { ...this.defaults.animation, ...(options.animation ?? {}) } };
+    this.#rootElement = root;
+    this.#settings = { animation: { ...this.#defaults.animation, ...(options.animation ?? {}) } };
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      this.settings.animation.duration = 0;
+      this.#settings.animation.duration = 0;
     }
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.#detailsElements = this.rootElement.querySelectorAll(`details${NOT_NESTED}`);
-    this.#summaryElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED}`);
-    this.#contentElements = this.rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
+    this.#detailsElements = this.#rootElement.querySelectorAll(`details${NOT_NESTED}`);
+    this.#summaryElements = this.#rootElement.querySelectorAll(`summary${NOT_NESTED}`);
+    this.#contentElements = this.#rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
     if (this.#detailsElements.length === 0 || this.#summaryElements.length === 0 || this.#contentElements.length === 0) {
       throw new Error('Details, summary or content element missing.');
     }
-    this.initialize();
+    this.#initialize();
   }
 
   open(details: HTMLDetailsElement): void {
-    if (this.destroyed || !this.#bindings) {
+    if (this.#destroyed || !this.#bindings) {
       return;
     }
     if (this.#bindings.has(details)) {
-      this.toggle(details, true);
+      this.#toggle(details, true);
     }
   }
 
   close(details: HTMLDetailsElement): void {
-    if (this.destroyed || !this.#bindings) {
+    if (this.#destroyed || !this.#bindings) {
       return;
     }
     if (this.#bindings.has(details)) {
-      this.toggle(details, false);
+      this.#toggle(details, false);
     }
   }
 
   async destroy(force = false): Promise<void> {
-    if (this.destroyed || !this.#detailsElements || !this.#bindings) {
+    if (this.#destroyed || !this.#detailsElements || !this.#bindings) {
       return;
     }
-    this.destroyed = true;
+    this.#destroyed = true;
+    for (const details of this.#detailsElements) {
+      const binding = this.#bindings.get(details);
+      const timer = binding?.timer;
+      if (timer) {
+        cancelAnimationFrame(timer);
+        binding.timer = null;
+      }
+    }
     this.#controller?.abort();
     this.#controller = null;
-    for (const observer of this.observers) {
-      observer.disconnect();
+    if (this.#observers) {
+      for (const observer of this.#observers) {
+        observer.disconnect();
+      }
+      this.#observers = null;
     }
-    this.rootElement.removeAttribute('data-disclosure-initialized');
+    this.#rootElement.removeAttribute('data-disclosure-initialized');
     for (const details of this.#detailsElements) {
       details.removeAttribute('data-disclosure-name');
       details.removeAttribute('data-disclosure-open');
@@ -88,7 +100,7 @@ export default class Disclosure {
       for (const details of this.#detailsElements) {
         const animation = this.#bindings.get(details)?.animation;
         if (animation) {
-          promises.push(this.waitAnimation(animation));
+          promises.push(this.#waitAnimation(animation));
         }
       }
       await Promise.allSettled(promises);
@@ -96,9 +108,13 @@ export default class Disclosure {
     for (const details of this.#detailsElements) {
       this.#bindings.get(details)?.animation?.cancel();
     }
+    this.#detailsElements = null;
+    this.#summaryElements = null;
+    this.#contentElements = null;
+    this.#bindings = null;
   }
 
-  private initialize(): void {
+  #initialize(): void {
     if (!this.#detailsElements || !this.#summaryElements || !this.#contentElements || !this.#bindings || !this.#controller) {
       return;
     }
@@ -112,17 +128,17 @@ export default class Disclosure {
       };
       const observer = new MutationObserver(sync);
       observer.observe(details, { attributeFilter: ['open'] });
-      this.observers.push(observer);
+      this.#observers?.push(observer);
       sync();
     }
     for (let i = 0, l = this.#summaryElements.length; i < l; i++) {
       const summary = this.#summaryElements[i];
-      if (!this.isFocusable(this.#detailsElements[i])) {
+      if (!this.#isFocusable(this.#detailsElements[i])) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
-      summary.addEventListener('click', this.handleSummaryClick, { signal });
-      summary.addEventListener('keydown', this.handleSummaryKeyDown, { signal });
+      summary.addEventListener('click', this.#handleSummaryClick, { signal });
+      summary.addEventListener('keydown', this.#handleSummaryKeyDown, { signal });
     }
     for (let i = 0, l = this.#detailsElements.length; i < l; i++) {
       const details = this.#detailsElements[i];
@@ -131,15 +147,15 @@ export default class Disclosure {
       if (!summary || !content) {
         continue;
       }
-      const binding = this.createBinding(details, summary, content);
+      const binding = this.#createBinding(details, summary, content);
       this.#bindings.set(details, binding);
       this.#bindings.set(summary, binding);
       this.#bindings.set(content, binding);
     }
-    this.rootElement.setAttribute('data-disclosure-initialized', '');
+    this.#rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  private handleSummaryClick = (event: MouseEvent): void => {
+  #handleSummaryClick = (event: MouseEvent): void => {
     if (!this.#bindings) {
       return;
     }
@@ -154,10 +170,10 @@ export default class Disclosure {
       return;
     }
     const { details } = binding;
-    this.toggle(details, !details.hasAttribute('data-disclosure-open'));
+    this.#toggle(details, !details.hasAttribute('data-disclosure-open'));
   };
 
-  private handleSummaryKeyDown = (event: KeyboardEvent): void => {
+  #handleSummaryKeyDown = (event: KeyboardEvent): void => {
     if (!this.#summaryElements || !this.#bindings) {
       return;
     }
@@ -170,11 +186,11 @@ export default class Disclosure {
     const focusables: HTMLElement[] = [];
     for (const summary of this.#summaryElements) {
       const binding = this.#bindings.get(summary);
-      if (binding && this.isFocusable(binding.details)) {
+      if (binding && this.#isFocusable(binding.details)) {
         focusables.push(summary);
       }
     }
-    const active = this.getActiveElement();
+    const active = this.#getActiveElement();
     if (!active) {
       return;
     }
@@ -197,7 +213,7 @@ export default class Disclosure {
     focusables.at(newIndex)?.focus();
   };
 
-  private toggle(details: HTMLDetailsElement, open: boolean): void {
+  #toggle(details: HTMLDetailsElement, open: boolean): void {
     if (!this.#detailsElements || !this.#bindings) {
       return;
     }
@@ -214,16 +230,22 @@ export default class Disclosure {
         }
       }
     }
-    const { content } = binding;
+    const { content, timer } = binding;
     const startSize = details.open ? content.offsetHeight : 0;
     binding.animation?.cancel();
     if (open) {
       details.open = true;
     }
     const endSize = open ? content.scrollHeight : 0;
-    requestAnimationFrame(() => details.toggleAttribute('data-disclosure-open', open));
+    if (timer) {
+      cancelAnimationFrame(timer);
+    }
+    binding.timer = requestAnimationFrame(() => {
+      binding.timer = null;
+      details.toggleAttribute('data-disclosure-open', open);
+    });
     content.style.setProperty('overflow', 'clip');
-    const { duration, easing } = this.settings.animation;
+    const { duration, easing } = this.#settings.animation;
     const animation = content.animate({ blockSize: [`${startSize}px`, `${endSize}px`] }, { duration, easing });
     binding.animation = animation;
     const cleanup = () => {
@@ -231,7 +253,11 @@ export default class Disclosure {
         binding.animation = null;
       }
     };
-    animation.addEventListener('cancel', cleanup, { once: true });
+    if (!this.#controller) {
+      return;
+    }
+    const { signal } = this.#controller;
+    animation.addEventListener('cancel', cleanup, { once: true, signal });
     animation.addEventListener(
       'finish',
       () => {
@@ -246,15 +272,15 @@ export default class Disclosure {
         style.removeProperty('block-size');
         style.removeProperty('overflow');
       },
-      { once: true },
+      { once: true, signal },
     );
   }
 
-  private createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): DisclosureBinding {
-    return { details, summary, content, animation: null };
+  #createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): DisclosureBinding {
+    return { details, summary, content, timer: null, animation: null };
   }
 
-  private getActiveElement(): HTMLElement | null {
+  #getActiveElement(): HTMLElement | null {
     let active = document.activeElement;
     while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
       active = active.shadowRoot.activeElement;
@@ -262,11 +288,11 @@ export default class Disclosure {
     return active instanceof HTMLElement ? active : null;
   }
 
-  private isFocusable(element: HTMLElement): boolean {
+  #isFocusable(element: HTMLElement): boolean {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 
-  private waitAnimation(animation: Animation): Promise<void> {
+  #waitAnimation(animation: Animation): Promise<void> {
     const { playState } = animation;
     if (playState === 'idle' || playState === 'finished') {
       return Promise.resolve();
