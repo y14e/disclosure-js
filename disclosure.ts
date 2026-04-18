@@ -53,15 +53,9 @@ export default class Disclosure {
     }
 
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.#detailsElements = this.#rootElement.querySelectorAll(
-      `details${NOT_NESTED}`,
-    );
-    this.#summaryElements = this.#rootElement.querySelectorAll(
-      `summary${NOT_NESTED}`,
-    );
-    this.#contentElements = this.#rootElement.querySelectorAll(
-      `summary${NOT_NESTED} + *`,
-    );
+    this.#detailsElements = this.#rootElement.querySelectorAll(`details${NOT_NESTED}`);
+    this.#summaryElements = this.#rootElement.querySelectorAll(`summary${NOT_NESTED}`);
+    this.#contentElements = this.#rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
 
     if (
       this.#detailsElements.length === 0 ||
@@ -327,10 +321,7 @@ export default class Disclosure {
     });
     content.style.setProperty('overflow', 'clip');
     const { duration, easing } = this.#settings.animation;
-    const animation = content.animate(
-      { blockSize: [`${startSize}px`, `${endSize}px`] },
-      { duration, easing },
-    );
+    const animation = content.animate({ blockSize: [`${startSize}px`, `${endSize}px`] }, { duration, easing });
     binding.animation = animation;
     const cleanup = () => {
       if (binding.animation === animation) {
@@ -350,10 +341,7 @@ export default class Disclosure {
         cleanup();
 
         if (name) {
-          details.setAttribute(
-            'name',
-            details.getAttribute('data-disclosure-name') ?? '',
-          );
+          details.setAttribute('name', details.getAttribute('data-disclosure-name') ?? '');
         }
 
         if (!open) {
@@ -368,11 +356,7 @@ export default class Disclosure {
     );
   }
 
-  #createBinding(
-    details: HTMLDetailsElement,
-    summary: HTMLElement,
-    content: HTMLElement,
-  ): Binding {
+  #createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): Binding {
     return { details, summary, content, timer: undefined, animation: null };
   }
 
