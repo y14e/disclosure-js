@@ -20,16 +20,9 @@ export default class Disclosure {
 
     this.#rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.#detailsElements =
-      this.#rootElement.querySelectorAll<HTMLDetailsElement>(
-        `details${NOT_NESTED}`,
-      );
-    this.#summaryElements = this.#rootElement.querySelectorAll<HTMLElement>(
-      `summary${NOT_NESTED}`,
-    );
-    this.#contentElements = this.#rootElement.querySelectorAll<HTMLElement>(
-      `summary${NOT_NESTED} + *`,
-    );
+    this.#detailsElements = this.#rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`);
+    this.#summaryElements = this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`);
+    this.#contentElements = this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`);
 
     if (
       this.#detailsElements.length === 0 ||
@@ -168,11 +161,7 @@ export default class Disclosure {
     }
   }
 
-  #createBinding(
-    details: HTMLDetailsElement,
-    summary: HTMLElement,
-    content: HTMLElement,
-  ): DisclosureBinding {
+  #createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): DisclosureBinding {
     return { details, summary, content };
   }
 
