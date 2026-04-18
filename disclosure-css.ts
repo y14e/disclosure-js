@@ -84,9 +84,7 @@ export default class Disclosure {
         summary.style.setProperty('pointer-events', 'none');
       }
 
-      summary.addEventListener('keydown', this.#onSummaryKeyDown, {
-        signal,
-      });
+      summary.addEventListener('keydown', this.#onSummaryKeyDown, { signal });
     }
     for (let i = 0, l = this.#detailsElements.length; i < l; i++) {
       const details = this.#detailsElements[i];
