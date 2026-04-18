@@ -164,6 +164,7 @@ export default class Disclosure {
       const sync = (): void => {
         details.toggleAttribute('data-disclosure-open', details.open);
       };
+
       const observer = new MutationObserver(sync);
       observer.observe(details, { attributeFilter: ['open'] });
       this.#observers?.push(observer);
@@ -179,9 +180,7 @@ export default class Disclosure {
       }
 
       summary.addEventListener('click', this.#onSummaryClick, { signal });
-      summary.addEventListener('keydown', this.#onSummaryKeyDown, {
-        signal,
-      });
+      summary.addEventListener('keydown', this.#onSummaryKeyDown, { signal });
     }
 
     for (let i = 0, l = this.#detailsElements.length; i < l; i++) {
@@ -323,6 +322,7 @@ export default class Disclosure {
     const { duration, easing } = this.#settings.animation;
     const animation = content.animate({ blockSize: [`${startSize}px`, `${endSize}px`] }, { duration, easing });
     binding.animation = animation;
+
     const cleanup = () => {
       if (binding.animation === animation) {
         binding.animation = null;
@@ -385,6 +385,7 @@ export default class Disclosure {
       const done = () => {
         resolve();
       };
+
       animation.addEventListener('cancel', done, { once: true });
       animation.addEventListener('finish', done, { once: true });
     });
