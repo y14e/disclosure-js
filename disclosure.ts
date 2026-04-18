@@ -44,7 +44,6 @@ export default class Disclosure {
     }
 
     this.#rootElement = root;
-
     this.#settings = {
       animation: { ...this.#defaults.animation, ...(options.animation ?? {}) },
     };
@@ -54,15 +53,12 @@ export default class Disclosure {
     }
 
     const NOT_NESTED = ':not(:scope summary + * *)';
-
     this.#detailsElements = this.#rootElement.querySelectorAll(
       `details${NOT_NESTED}`,
     );
-
     this.#summaryElements = this.#rootElement.querySelectorAll(
       `summary${NOT_NESTED}`,
     );
-
     this.#contentElements = this.#rootElement.querySelectorAll(
       `summary${NOT_NESTED} + *`,
     );
@@ -96,7 +92,6 @@ export default class Disclosure {
     }
 
     this.#destroyed = true;
-
     this.#controller?.abort();
     this.#controller = null;
 
@@ -175,11 +170,9 @@ export default class Disclosure {
       const sync = (): void => {
         details.toggleAttribute('data-disclosure-open', details.open);
       };
-
       const observer = new MutationObserver(sync);
       observer.observe(details, { attributeFilter: ['open'] });
       this.#observers?.push(observer);
-
       sync();
     }
 
@@ -207,7 +200,6 @@ export default class Disclosure {
       }
 
       const binding = this.#createBinding(details, summary, content);
-
       this.#bindings.set(details, binding);
       this.#bindings.set(summary, binding);
       this.#bindings.set(content, binding);
@@ -223,7 +215,6 @@ export default class Disclosure {
 
     event.preventDefault();
     event.stopPropagation();
-
     const summary = event.currentTarget;
 
     if (!(summary instanceof HTMLElement)) {
@@ -237,7 +228,6 @@ export default class Disclosure {
     }
 
     const { details } = binding;
-
     this.#toggle(details, !details.hasAttribute('data-disclosure-open'));
   };
 
@@ -254,7 +244,6 @@ export default class Disclosure {
 
     event.preventDefault();
     event.stopPropagation();
-
     const focusables: HTMLElement[] = [];
 
     for (const summary of this.#summaryElements) {
@@ -319,9 +308,7 @@ export default class Disclosure {
     }
 
     const { content, timer } = binding;
-
     const startSize = details.open ? content.offsetHeight : 0;
-
     binding.animation?.cancel();
 
     if (open) {
@@ -338,18 +325,13 @@ export default class Disclosure {
       binding.timer = undefined;
       details.toggleAttribute('data-disclosure-open', open);
     });
-
     content.style.setProperty('overflow', 'clip');
-
     const { duration, easing } = this.#settings.animation;
-
     const animation = content.animate(
       { blockSize: [`${startSize}px`, `${endSize}px`] },
       { duration, easing },
     );
-
     binding.animation = animation;
-
     const cleanup = () => {
       if (binding.animation === animation) {
         binding.animation = null;
@@ -361,9 +343,7 @@ export default class Disclosure {
     }
 
     const { signal } = this.#controller;
-
     animation.addEventListener('cancel', cleanup, { once: true, signal });
-
     animation.addEventListener(
       'finish',
       () => {
@@ -381,7 +361,6 @@ export default class Disclosure {
         }
 
         const { style } = content;
-
         style.removeProperty('block-size');
         style.removeProperty('overflow');
       },
@@ -422,7 +401,6 @@ export default class Disclosure {
       const done = () => {
         resolve();
       };
-
       animation.addEventListener('cancel', done, { once: true });
       animation.addEventListener('finish', done, { once: true });
     });

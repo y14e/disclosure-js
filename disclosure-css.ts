@@ -19,18 +19,14 @@ export default class Disclosure {
     }
 
     this.#rootElement = root;
-
     const NOT_NESTED = ':not(:scope summary + * *)';
-
     this.#detailsElements =
       this.#rootElement.querySelectorAll<HTMLDetailsElement>(
         `details${NOT_NESTED}`,
       );
-
     this.#summaryElements = this.#rootElement.querySelectorAll<HTMLElement>(
       `summary${NOT_NESTED}`,
     );
-
     this.#contentElements = this.#rootElement.querySelectorAll<HTMLElement>(
       `summary${NOT_NESTED} + *`,
     );
@@ -64,12 +60,9 @@ export default class Disclosure {
     }
 
     this.#destroyed = true;
-
     this.#controller?.abort();
     this.#controller = null;
-
     this.#rootElement.removeAttribute('data-disclosure-initialized');
-
     this.#detailsElements = null;
     this.#summaryElements = null;
     this.#contentElements = null;
@@ -112,7 +105,6 @@ export default class Disclosure {
       }
 
       const binding = this.#createBinding(details, summary, content);
-
       this.#bindings.set(details, binding);
       this.#bindings.set(summary, binding);
       this.#bindings.set(content, binding);
@@ -133,7 +125,6 @@ export default class Disclosure {
 
     event.preventDefault();
     event.stopPropagation();
-
     const focusables: HTMLElement[] = [];
 
     for (const summary of this.#summaryElements) {
