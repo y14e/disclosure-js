@@ -172,9 +172,9 @@ export default class Disclosure {
     }
 
     for (let i = 0, l = this.#summaryElements.length; i < l; i++) {
-      const summary = this.#summaryElements[i];
+      const summary = this.#summaryElements[i] as HTMLElement;
 
-      if (!this.#isFocusable(this.#detailsElements[i])) {
+      if (!this.#isFocusable(this.#detailsElements[i] as HTMLDetailsElement)) {
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
@@ -184,7 +184,7 @@ export default class Disclosure {
     }
 
     for (let i = 0, l = this.#detailsElements.length; i < l; i++) {
-      const details = this.#detailsElements[i];
+      const details = this.#detailsElements[i] as HTMLDetailsElement;
       const summary = this.#summaryElements[i];
       const content = this.#contentElements[i];
 
