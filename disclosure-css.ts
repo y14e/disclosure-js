@@ -104,7 +104,7 @@ export default class Disclosure {
   }
 
   #onSummaryKeyDown = (event: KeyboardEvent): void => {
-    if (!this.#summaryElements || !this.#bindings) {
+    if (!this.#summaryElements) {
       return;
     }
 
@@ -119,7 +119,7 @@ export default class Disclosure {
     const focusables: HTMLElement[] = [];
 
     for (const summary of this.#summaryElements) {
-      const binding = this.#bindings.get(summary);
+      const binding = this.#bindings?.get(summary);
 
       if (binding && this.#isFocusable(binding.details)) {
         focusables.push(summary);

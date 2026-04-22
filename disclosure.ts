@@ -202,10 +202,6 @@ export default class Disclosure {
   }
 
   #onSummaryClick = (event: MouseEvent): void => {
-    if (!this.#bindings) {
-      return;
-    }
-
     event.preventDefault();
     event.stopPropagation();
     const summary = event.currentTarget;
@@ -214,7 +210,7 @@ export default class Disclosure {
       return;
     }
 
-    const binding = this.#bindings.get(summary);
+    const binding = this.#bindings?.get(summary);
 
     if (!binding) {
       return;
@@ -225,7 +221,7 @@ export default class Disclosure {
   };
 
   #onSummaryKeyDown = (event: KeyboardEvent): void => {
-    if (!this.#summaryElements || !this.#bindings) {
+    if (!this.#summaryElements) {
       return;
     }
 
@@ -240,7 +236,7 @@ export default class Disclosure {
     const focusables: HTMLElement[] = [];
 
     for (const summary of this.#summaryElements) {
-      const binding = this.#bindings.get(summary);
+      const binding = this.#bindings?.get(summary);
 
       if (binding && this.#isFocusable(binding.details)) {
         focusables.push(summary);
@@ -275,11 +271,11 @@ export default class Disclosure {
   };
 
   #toggle(details: HTMLDetailsElement, open: boolean): void {
-    if (!this.#detailsElements || !this.#bindings) {
+    if (!this.#detailsElements) {
       return;
     }
 
-    const binding = this.#bindings.get(details);
+    const binding = this.#bindings?.get(details);
 
     if (!binding || open === details.hasAttribute('data-disclosure-open')) {
       return;
