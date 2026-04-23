@@ -11,7 +11,7 @@ export default class Disclosure {
   #contentElements: NodeListOf<HTMLElement> | null;
   #bindings: WeakMap<HTMLElement, DisclosureBinding> | null = new WeakMap();
   #controller: AbortController | null = new AbortController();
-  #destroyed = false;
+  #isDestroyed = false;
 
   constructor(root: HTMLElement) {
     if (!root) {
@@ -36,23 +36,23 @@ export default class Disclosure {
   }
 
   open(details: HTMLDetailsElement): void {
-    if (!this.#destroyed && this.#bindings?.has(details)) {
+    if (!this.#isDestroyed && this.#bindings?.has(details)) {
       this.#toggle(details, true);
     }
   }
 
   close(details: HTMLDetailsElement): void {
-    if (!this.#destroyed && this.#bindings?.has(details)) {
+    if (!this.#isDestroyed && this.#bindings?.has(details)) {
       this.#toggle(details, false);
     }
   }
 
   destroy(): void {
-    if (this.#destroyed) {
+    if (this.#isDestroyed) {
       return;
     }
 
-    this.#destroyed = true;
+    this.#isDestroyed = true;
     this.#controller?.abort();
     this.#controller = null;
     this.#rootElement.removeAttribute('data-disclosure-initialized');
@@ -153,9 +153,9 @@ export default class Disclosure {
     focusables.at(newIndex)?.focus();
   };
 
-  #toggle(details: HTMLDetailsElement, open: boolean): void {
-    if (open !== details.open) {
-      details.open = open;
+  #toggle(details: HTMLDetailsElement, isOpen: boolean): void {
+    if (isOpen !== details.open) {
+      details.open = isOpen;
     }
   }
 

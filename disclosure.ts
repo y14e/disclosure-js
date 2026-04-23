@@ -36,7 +36,7 @@ export default class Disclosure {
   #bindings: WeakMap<HTMLElement, Binding> | null = new WeakMap();
   #controller: AbortController | null = new AbortController();
   #observers: MutationObserver[] | null = [];
-  #destroyed = false;
+  #isDestroyed = false;
 
   constructor(root: HTMLElement, options: DisclosureOptions = {}) {
     if (!root) {
@@ -69,23 +69,23 @@ export default class Disclosure {
   }
 
   open(details: HTMLDetailsElement): void {
-    if (!this.#destroyed && this.#bindings?.has(details)) {
+    if (!this.#isDestroyed && this.#bindings?.has(details)) {
       this.#toggle(details, true);
     }
   }
 
   close(details: HTMLDetailsElement): void {
-    if (!this.#destroyed && this.#bindings?.has(details)) {
+    if (!this.#isDestroyed && this.#bindings?.has(details)) {
       this.#toggle(details, false);
     }
   }
 
-  async destroy(force = false): Promise<void> {
-    if (this.#destroyed || !this.#detailsElements || !this.#bindings) {
+  async destroy(isForce = false): Promise<void> {
+    if (this.#isDestroyed || !this.#detailsElements || !this.#bindings) {
       return;
     }
 
-    this.#destroyed = true;
+    this.#isDestroyed = true;
     this.#controller?.abort();
     this.#controller = null;
 
@@ -119,7 +119,7 @@ export default class Disclosure {
       details.removeAttribute('data-disclosure-open');
     }
 
-    if (!force) {
+    if (!isForce) {
       const promises: Promise<void>[] = [];
 
       for (const details of this.#detailsElements) {
@@ -270,20 +270,20 @@ export default class Disclosure {
     focusables.at(newIndex)?.focus();
   };
 
-  #toggle(details: HTMLDetailsElement, open: boolean): void {
+  #toggle(details: HTMLDetailsElement, isOpen: boolean): void {
     if (!this.#detailsElements) {
       return;
     }
 
     const binding = this.#bindings?.get(details);
 
-    if (!binding || open === details.hasAttribute('data-disclosure-open')) {
+    if (!binding || isOpen === details.hasAttribute('data-disclosure-open')) {
       return;
     }
 
     const name = details.getAttribute('data-disclosure-name');
 
-    if (name && open) {
+    if (name && isOpen) {
       for (const d of this.#detailsElements) {
         if (
           d !== details &&
@@ -300,11 +300,11 @@ export default class Disclosure {
     const startSize = details.open ? content.offsetHeight : 0;
     binding.animation?.cancel();
 
-    if (open) {
+    if (isOpen) {
       details.open = true;
     }
 
-    const endSize = open ? content.scrollHeight : 0;
+    const endSize = isOpen ? content.scrollHeight : 0;
 
     if (timer) {
       cancelAnimationFrame(timer);
@@ -312,7 +312,7 @@ export default class Disclosure {
 
     binding.timer = requestAnimationFrame(() => {
       binding.timer = undefined;
-      details.toggleAttribute('data-disclosure-open', open);
+      details.toggleAttribute('data-disclosure-open', isOpen);
     });
     content.style.setProperty('overflow', 'clip');
     const { duration, easing } = this.#settings.animation;
@@ -340,7 +340,7 @@ export default class Disclosure {
           details.setAttribute('name', details.getAttribute('data-disclosure-name') ?? '');
         }
 
-        if (!open) {
+        if (!isOpen) {
           details.open = false;
         }
 
