@@ -310,7 +310,7 @@ export default class Disclosure {
       cancelAnimationFrame(timer);
     }
 
-    binding.timer = requestAnimationFrame(() => {
+    binding.timer = requestAnimationFrame((): void => {
       binding.timer = undefined;
       details.toggleAttribute('data-disclosure-open', isOpen);
     });
@@ -319,7 +319,7 @@ export default class Disclosure {
     const animation = content.animate({ blockSize: [`${startSize}px`, `${endSize}px`] }, { duration, easing });
     binding.animation = animation;
 
-    const cleanup = () => {
+    const cleanup = (): void => {
       if (binding.animation === animation) {
         binding.animation = null;
       }
@@ -333,7 +333,7 @@ export default class Disclosure {
     animation.addEventListener('cancel', cleanup, { once: true, signal });
     animation.addEventListener(
       'finish',
-      () => {
+      (): void => {
         cleanup();
 
         if (name) {
@@ -377,8 +377,8 @@ export default class Disclosure {
       return Promise.resolve();
     }
 
-    return new Promise<void>((resolve) => {
-      const done = () => {
+    return new Promise<void>((resolve): void => {
+      const done = (): void => {
         resolve();
       };
 
