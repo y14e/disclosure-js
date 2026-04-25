@@ -233,16 +233,10 @@ export default class Disclosure {
 
     event.preventDefault();
     event.stopPropagation();
-    const focusables: HTMLElement[] = [];
-
-    this.#summaryElements.forEach((summary) => {
+    const focusables = this.#summaryElements.filter((summary) => {
       const binding = this.#bindings?.get(summary);
-
-      if (binding && this.#isFocusable(binding.details)) {
-        focusables.push(summary);
-      }
+      return binding && this.#isFocusable(binding.details);
     });
-
     const active = this.#getActiveElement();
 
     if (!active) {
