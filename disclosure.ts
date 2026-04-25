@@ -333,7 +333,7 @@ export default class Disclosure {
     animation.addEventListener('cancel', cleanup, { once: true, signal });
     animation.addEventListener(
       'finish',
-      (): void => {
+      () => {
         cleanup();
 
         if (name) {
@@ -377,7 +377,7 @@ export default class Disclosure {
       return Promise.resolve();
     }
 
-    return new Promise<void>((resolve): void => {
+    return new Promise<void>((resolve) => {
       const done = (): void => {
         resolve();
       };
