@@ -28,7 +28,7 @@ export default class Disclosure {
       duration: 300,
       easing: 'ease',
     },
-  } satisfies DeepRequired<DisclosureOptions>;
+  };
   #settings: DeepRequired<DisclosureOptions>;
   #detailsElements: HTMLDetailsElement[] | null;
   #summaryElements: HTMLElement[] | null;
