@@ -6,9 +6,9 @@ type DisclosureBinding = {
 
 export default class Disclosure {
   #rootElement: HTMLElement;
-  #detailsElements: NodeListOf<HTMLDetailsElement> | null;
-  #summaryElements: NodeListOf<HTMLElement> | null;
-  #contentElements: NodeListOf<HTMLElement> | null;
+  #detailsElements: HTMLDetailsElement[] | null;
+  #summaryElements: HTMLElement[] | null;
+  #contentElements: HTMLElement[] | null;
   #bindings: WeakMap<HTMLElement, DisclosureBinding> | null = new WeakMap();
   #controller: AbortController | null = new AbortController();
   #isDestroyed = false;
@@ -20,9 +20,9 @@ export default class Disclosure {
 
     this.#rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.#detailsElements = this.#rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`);
-    this.#summaryElements = this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`);
-    this.#contentElements = this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`);
+    this.#detailsElements = [...this.#rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`)];
+    this.#summaryElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`)];
+    this.#contentElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`)];
 
     if (
       this.#detailsElements.length === 0 ||
@@ -116,16 +116,10 @@ export default class Disclosure {
 
     event.preventDefault();
     event.stopPropagation();
-    const focusables: HTMLElement[] = [];
-
-    for (const summary of this.#summaryElements) {
+    const focusables = this.#summaryElements.filter((summary) => {
       const binding = this.#bindings?.get(summary);
-
-      if (binding && this.#isFocusable(binding.details)) {
-        focusables.push(summary);
-      }
-    }
-
+      return binding && this.#isFocusable(binding.details);
+    });
     const active = this.#getActiveElement();
 
     if (!active) {

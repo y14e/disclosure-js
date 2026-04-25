@@ -30,9 +30,9 @@ export default class Disclosure {
     },
   } satisfies DeepRequired<DisclosureOptions>;
   #settings: DeepRequired<DisclosureOptions>;
-  #detailsElements: NodeListOf<HTMLDetailsElement> | null;
-  #summaryElements: NodeListOf<HTMLElement> | null;
-  #contentElements: NodeListOf<HTMLElement> | null;
+  #detailsElements: HTMLDetailsElement[] | null;
+  #summaryElements: HTMLElement[] | null;
+  #contentElements: HTMLElement[] | null;
   #bindings: WeakMap<HTMLElement, Binding> | null = new WeakMap();
   #controller: AbortController | null = new AbortController();
   #observers: MutationObserver[] | null = [];
@@ -53,9 +53,9 @@ export default class Disclosure {
     }
 
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.#detailsElements = this.#rootElement.querySelectorAll(`details${NOT_NESTED}`);
-    this.#summaryElements = this.#rootElement.querySelectorAll(`summary${NOT_NESTED}`);
-    this.#contentElements = this.#rootElement.querySelectorAll(`summary${NOT_NESTED} + *`);
+    this.#detailsElements = [...this.#rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`)];
+    this.#summaryElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`)];
+    this.#contentElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`)];
 
     if (
       this.#detailsElements.length === 0 ||
@@ -90,18 +90,18 @@ export default class Disclosure {
     this.#controller = null;
 
     if (this.#observers) {
-      for (const observer of this.#observers) {
+      this.#observers.forEach((observer) => {
         observer.disconnect();
-      }
+      });
 
       this.#observers = null;
     }
 
-    for (const details of this.#detailsElements) {
-      const binding = this.#bindings.get(details);
+    this.#detailsElements.forEach((details) => {
+      const binding = this.#bindings?.get(details);
 
       if (!binding) {
-        continue;
+        return;
       }
 
       const { timer } = binding;
@@ -110,32 +110,32 @@ export default class Disclosure {
         cancelAnimationFrame(timer);
         binding.timer = undefined;
       }
-    }
+    });
 
     this.#rootElement.removeAttribute('data-disclosure-initialized');
 
-    for (const details of this.#detailsElements) {
+    this.#detailsElements.forEach((details) => {
       details.removeAttribute('data-disclosure-name');
       details.removeAttribute('data-disclosure-open');
-    }
+    });
 
     if (!isForce) {
       const promises: Promise<void>[] = [];
 
-      for (const details of this.#detailsElements) {
-        const animation = this.#bindings.get(details)?.animation;
+      this.#detailsElements.forEach((details) => {
+        const animation = this.#bindings?.get(details)?.animation;
 
         if (animation) {
           promises.push(this.#waitAnimation(animation));
         }
-      }
+      });
 
       await Promise.allSettled(promises);
     }
 
-    for (const details of this.#detailsElements) {
-      this.#bindings.get(details)?.animation?.cancel();
-    }
+    this.#detailsElements.forEach((details) => {
+      this.#bindings?.get(details)?.animation?.cancel();
+    });
 
     this.#detailsElements = null;
     this.#summaryElements = null;
@@ -156,7 +156,7 @@ export default class Disclosure {
 
     const { signal } = this.#controller;
 
-    for (const details of this.#detailsElements) {
+    this.#detailsElements.forEach((details) => {
       if (details.name) {
         details.setAttribute('data-disclosure-name', details.name);
       }
@@ -169,7 +169,7 @@ export default class Disclosure {
       observer.observe(details, { attributeFilter: ['open'] });
       this.#observers?.push(observer);
       sync();
-    }
+    });
 
     for (let i = 0, l = this.#summaryElements.length; i < l; i++) {
       const summary = this.#summaryElements[i] as HTMLElement;
@@ -235,13 +235,13 @@ export default class Disclosure {
     event.stopPropagation();
     const focusables: HTMLElement[] = [];
 
-    for (const summary of this.#summaryElements) {
+    this.#summaryElements.forEach((summary) => {
       const binding = this.#bindings?.get(summary);
 
       if (binding && this.#isFocusable(binding.details)) {
         focusables.push(summary);
       }
-    }
+    });
 
     const active = this.#getActiveElement();
 
@@ -284,15 +284,12 @@ export default class Disclosure {
     const name = details.getAttribute('data-disclosure-name');
 
     if (name && isOpen) {
-      for (const d of this.#detailsElements) {
-        if (
-          d !== details &&
-          d.getAttribute('data-disclosure-name') === name &&
-          d.hasAttribute('data-disclosure-open')
-        ) {
-          this.close(d);
-          break;
-        }
+      const opened = this.#detailsElements.find(
+        (d) => d.hasAttribute('data-disclosure-open') && d.getAttribute('data-disclosure-name') === name,
+      );
+
+      if (opened) {
+        this.close(opened);
       }
     }
 
@@ -310,7 +307,7 @@ export default class Disclosure {
       cancelAnimationFrame(timer);
     }
 
-    binding.timer = requestAnimationFrame((): void => {
+    binding.timer = requestAnimationFrame(() => {
       binding.timer = undefined;
       details.toggleAttribute('data-disclosure-open', isOpen);
     });
