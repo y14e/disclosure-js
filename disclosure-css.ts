@@ -1,4 +1,4 @@
-type DisclosureBinding = {
+type Binding = {
   details: HTMLDetailsElement;
   summary: HTMLElement;
   content: HTMLElement;
@@ -9,7 +9,7 @@ export default class Disclosure {
   #detailsElements: HTMLDetailsElement[] | null;
   #summaryElements: HTMLElement[] | null;
   #contentElements: HTMLElement[] | null;
-  #bindings: WeakMap<HTMLElement, DisclosureBinding> | null = new WeakMap();
+  #bindings: WeakMap<HTMLElement, Binding> | null = new WeakMap();
   #controller: AbortController | null = new AbortController();
   #isDestroyed = false;
 
@@ -62,7 +62,7 @@ export default class Disclosure {
     this.#bindings = null;
   }
 
-  #initialize(): void {
+  #initialize() {
     if (
       !this.#detailsElements ||
       !this.#summaryElements ||
@@ -107,7 +107,7 @@ export default class Disclosure {
     this.#rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  #onSummaryKeyDown = (event: KeyboardEvent): void => {
+  #onSummaryKeyDown = (event: KeyboardEvent) => {
     if (!this.#summaryElements) {
       return;
     }
@@ -151,17 +151,17 @@ export default class Disclosure {
     focusables.at(newIndex)?.focus();
   };
 
-  #toggle(details: HTMLDetailsElement, isOpen: boolean): void {
+  #toggle(details: HTMLDetailsElement, isOpen: boolean) {
     if (isOpen !== details.open) {
       details.open = isOpen;
     }
   }
 
-  #createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): DisclosureBinding {
+  #createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement) {
     return { details, summary, content };
   }
 
-  #getActiveElement(): HTMLElement | null {
+  #getActiveElement() {
     let active = document.activeElement;
 
     while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
@@ -171,7 +171,7 @@ export default class Disclosure {
     return active instanceof HTMLElement ? active : null;
   }
 
-  #isFocusable(element: HTMLElement): boolean {
+  #isFocusable(element: HTMLElement) {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 }
