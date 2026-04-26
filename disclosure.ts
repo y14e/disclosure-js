@@ -143,7 +143,7 @@ export default class Disclosure {
     this.#bindings = null;
   }
 
-  #initialize(): void {
+  #initialize() {
     if (
       !this.#detailsElements ||
       !this.#summaryElements ||
@@ -161,7 +161,7 @@ export default class Disclosure {
         details.setAttribute('data-disclosure-name', details.name);
       }
 
-      const sync = (): void => {
+      const sync = () => {
         details.toggleAttribute('data-disclosure-open', details.open);
       };
 
@@ -206,7 +206,7 @@ export default class Disclosure {
     this.#rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
-  #onSummaryClick = (event: MouseEvent): void => {
+  #onSummaryClick = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     const summary = event.currentTarget;
@@ -225,7 +225,7 @@ export default class Disclosure {
     this.#toggle(details, !details.hasAttribute('data-disclosure-open'));
   };
 
-  #onSummaryKeyDown = (event: KeyboardEvent): void => {
+  #onSummaryKeyDown = (event: KeyboardEvent) => {
     if (!this.#summaryElements) {
       return;
     }
@@ -269,7 +269,7 @@ export default class Disclosure {
     focusables.at(newIndex)?.focus();
   };
 
-  #toggle(details: HTMLDetailsElement, isOpen: boolean): void {
+  #toggle(details: HTMLDetailsElement, isOpen: boolean) {
     if (!this.#detailsElements) {
       return;
     }
@@ -315,7 +315,7 @@ export default class Disclosure {
     const animation = content.animate({ blockSize: [`${startSize}px`, `${endSize}px`] }, { duration, easing });
     binding.animation = animation;
 
-    const cleanup = (): void => {
+    const cleanup = () => {
       if (binding.animation === animation) {
         binding.animation = null;
       }
@@ -348,11 +348,11 @@ export default class Disclosure {
     );
   }
 
-  #createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement): Binding {
+  #createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement) {
     return { details, summary, content, timer: undefined, animation: null };
   }
 
-  #getActiveElement(): HTMLElement | null {
+  #getActiveElement() {
     let active = document.activeElement;
 
     while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
@@ -362,11 +362,11 @@ export default class Disclosure {
     return active instanceof HTMLElement ? active : null;
   }
 
-  #isFocusable(element: HTMLElement): boolean {
+  #isFocusable(element: HTMLElement) {
     return element.getAttribute('aria-disabled') !== 'true';
   }
 
-  #waitAnimation(animation: Animation): Promise<void> {
+  #waitAnimation(animation: Animation) {
     const { playState } = animation;
 
     if (playState === 'idle' || playState === 'finished') {
@@ -374,7 +374,7 @@ export default class Disclosure {
     }
 
     return new Promise<void>((resolve) => {
-      const done = (): void => {
+      const done = () => {
         resolve();
       };
 
