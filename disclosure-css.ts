@@ -76,8 +76,12 @@ export default class Disclosure {
     const { signal } = this.#controller;
 
     for (let i = 0, l = this.#summaryElements.length; i < l; i++) {
-      const summary = this.#summaryElements[i] as HTMLElement;
-      const details = this.#detailsElements[i] as HTMLDetailsElement;
+      const details = this.#detailsElements[i];
+      const summary = this.#summaryElements[i];
+
+      if (!details || !summary) {
+        continue;
+      }
 
       if (!this.#isFocusable(details)) {
         summary.setAttribute('tabindex', '-1');
@@ -87,11 +91,11 @@ export default class Disclosure {
       summary.addEventListener('keydown', this.#onSummaryKeyDown, { signal });
     }
     for (let i = 0, l = this.#detailsElements.length; i < l; i++) {
-      const details = this.#detailsElements[i] as HTMLDetailsElement;
+      const details = this.#detailsElements[i];
       const summary = this.#summaryElements[i];
       const content = this.#contentElements[i];
 
-      if (!summary || !content) {
+      if (!details || !summary || !content) {
         continue;
       }
 
