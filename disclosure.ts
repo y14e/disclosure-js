@@ -238,10 +238,12 @@ export default class Disclosure {
 
     event.preventDefault();
     event.stopPropagation();
+
     const focusables = this.#summaryElements.filter((summary) => {
       const binding = this.#bindings?.get(summary);
       return binding && this.#isFocusable(binding.details);
     });
+
     const active = this.#getActiveElement();
 
     if (!active) {
@@ -327,6 +329,7 @@ export default class Disclosure {
 
     const { signal } = this.#controller;
     animation.addEventListener('cancel', cleanup, { once: true, signal });
+
     animation.addEventListener(
       'finish',
       () => {
