@@ -24,7 +24,11 @@ export default class Disclosure {
     this.#summaryElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`)];
     this.#contentElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`)];
 
-    if (this.#detailsElements.length === 0 || this.#summaryElements.length === 0 || this.#contentElements.length === 0) {
+    if (
+      this.#detailsElements.length === 0 ||
+      this.#summaryElements.length === 0 ||
+      this.#contentElements.length === 0
+    ) {
       throw new Error('Details, summary, or content element missing');
     }
 
@@ -59,7 +63,13 @@ export default class Disclosure {
   }
 
   #initialize() {
-    if (!this.#detailsElements || !this.#summaryElements || !this.#contentElements || !this.#bindings || !this.#controller) {
+    if (
+      !this.#detailsElements ||
+      !this.#summaryElements ||
+      !this.#contentElements ||
+      !this.#bindings ||
+      !this.#controller
+    ) {
       return;
     }
 
