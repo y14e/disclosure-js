@@ -5,7 +5,13 @@ export interface DisclosureOptions {
   };
 }
 
-type DeepRequired<T> = T extends (...args: unknown[]) => unknown ? T : T extends readonly unknown[] ? T : T extends object ? { [K in keyof T]-?: DeepRequired<NonNullable<T[K]>> } : NonNullable<T>;
+type DeepRequired<T> = T extends (...args: unknown[]) => unknown
+  ? T
+  : T extends readonly unknown[]
+    ? T
+    : T extends object
+      ? { [K in keyof T]-?: DeepRequired<NonNullable<T[K]>> }
+      : NonNullable<T>;
 
 type Binding = {
   details: HTMLDetailsElement;
@@ -51,7 +57,11 @@ export default class Disclosure {
     this.#summaryElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`)];
     this.#contentElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`)];
 
-    if (this.#detailsElements.length === 0 || this.#summaryElements.length === 0 || this.#contentElements.length === 0) {
+    if (
+      this.#detailsElements.length === 0 ||
+      this.#summaryElements.length === 0 ||
+      this.#contentElements.length === 0
+    ) {
       throw new Error('Details, summary or content element missing');
     }
 
@@ -134,7 +144,13 @@ export default class Disclosure {
   }
 
   #initialize() {
-    if (!this.#detailsElements || !this.#summaryElements || !this.#contentElements || !this.#bindings || !this.#controller) {
+    if (
+      !this.#detailsElements ||
+      !this.#summaryElements ||
+      !this.#contentElements ||
+      !this.#bindings ||
+      !this.#controller
+    ) {
       return;
     }
 
@@ -269,7 +285,9 @@ export default class Disclosure {
     const name = details.getAttribute('data-disclosure-name');
 
     if (name && isOpen) {
-      const opened = this.#detailsElements.find((d) => d.hasAttribute('data-disclosure-open') && d.getAttribute('data-disclosure-name') === name);
+      const opened = this.#detailsElements.find(
+        (d) => d.hasAttribute('data-disclosure-open') && d.getAttribute('data-disclosure-name') === name,
+      );
 
       if (opened) {
         this.close(opened);
