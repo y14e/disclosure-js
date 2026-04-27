@@ -1,6 +1,6 @@
-# disclosure.ts (v2)
+# disclosure.ts
 
-A [disclosure](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/) pattern implementation in TS. Using the `<details>` and `<summary>` element.
+A [disclosure](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/) pattern implementation in TypeScript. Using the `<details>` and `<summary>` element.
 
 ## Usage
 
