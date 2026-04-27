@@ -63,24 +63,18 @@ export default class Disclosure {
   }
 
   #initialize() {
-    if (
-      !this.#detailsElements ||
-      !this.#summaryElements ||
-      !this.#contentElements ||
-      !this.#bindings ||
-      !this.#controller
-    ) {
+    if (!this.#detailsElements || !this.#controller) {
       return;
     }
 
     const { signal } = this.#controller;
 
-    for (let i = 0, l = this.#summaryElements.length; i < l; i++) {
-      const details = this.#detailsElements[i];
-      const summary = this.#summaryElements[i];
+    this.#detailsElements.forEach((details, i) => {
+      const summary = this.#summaryElements?.[i];
+      const content = this.#contentElements?.[i];
 
-      if (!details || !summary) {
-        continue;
+      if (!summary || !content || !this.#bindings) {
+        return;
       }
 
       if (!this.#isFocusable(details)) {
@@ -89,21 +83,12 @@ export default class Disclosure {
       }
 
       summary.addEventListener('keydown', this.#onSummaryKeyDown, { signal });
-    }
-    for (let i = 0, l = this.#detailsElements.length; i < l; i++) {
-      const details = this.#detailsElements[i];
-      const summary = this.#summaryElements[i];
-      const content = this.#contentElements[i];
-
-      if (!details || !summary || !content) {
-        continue;
-      }
-
       const binding = this.#createBinding(details, summary, content);
       this.#bindings.set(details, binding);
       this.#bindings.set(summary, binding);
       this.#bindings.set(content, binding);
-    }
+    });
+
     this.#rootElement.setAttribute('data-disclosure-initialized', '');
   }
 
