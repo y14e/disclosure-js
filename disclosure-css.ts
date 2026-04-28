@@ -78,6 +78,7 @@ export default class Disclosure {
       }
 
       if (!this.#isFocusable(details)) {
+        summary.setAttribute('aria-disabled', 'true');
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
       }
@@ -157,6 +158,6 @@ export default class Disclosure {
   }
 
   #isFocusable(element: HTMLElement) {
-    return element.getAttribute('aria-disabled') !== 'true';
+    return element.getAttribute('tabindex') !== '-1';
   }
 }
