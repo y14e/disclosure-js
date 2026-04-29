@@ -40,7 +40,7 @@ disclosure.open(details);
 #### close
 
 ```ts
-disclosure.open(details);
+disclosure.close(details);
 // => void
 //
 // details: HTMLDetailsElement
