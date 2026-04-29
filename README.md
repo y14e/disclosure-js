@@ -26,6 +26,35 @@ interface DisclosureOptions {
 }
 ```
 
+### 📦 API
+
+#### open
+
+```ts
+disclosure.open(details);
+// => void
+//
+// details: HTMLDetailsElement
+```
+
+#### close
+
+```ts
+disclosure.open(details);
+// => void
+//
+// details: HTMLDetailsElement
+```
+
+#### destroy
+
+```ts
+disclosure.destroy(isForce);
+// => Promise<void>
+//
+// isForce (optional): If true, skips waiting for animations to finish.
+```
+
 ## Demo
 
 - https://y14e.github.io/disclosure-ts/
