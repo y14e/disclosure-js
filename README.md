@@ -28,7 +28,7 @@ interface DisclosureOptions {
 
 ## 📦 API
 
-### open
+### `open`
 
 ```ts
 disclosure.open(details);
@@ -37,7 +37,7 @@ disclosure.open(details);
 // details: HTMLDetailsElement
 ```
 
-### close
+### `close`
 
 ```ts
 disclosure.close(details);
@@ -46,7 +46,7 @@ disclosure.close(details);
 // details: HTMLDetailsElement
 ```
 
-### destroy
+### `destroy`
 
 Destroys the instance and cleans up all event listeners.
 
