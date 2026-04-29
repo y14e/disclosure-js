@@ -48,6 +48,8 @@ disclosure.open(details);
 
 #### destroy
 
+Destroys the instance and cleans up all event listeners.
+
 ```ts
 disclosure.destroy(isForce);
 // => Promise<void>
