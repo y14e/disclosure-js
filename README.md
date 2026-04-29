@@ -51,10 +51,10 @@ disclosure.close(details);
 Destroys the instance and cleans up all event listeners.
 
 ```ts
-disclosure.destroy(isForce);
+disclosure.destroy(force);
 // => Promise<void>
 //
-// isForce (optional): If true, skips waiting for animations to finish.
+// force (optional): If true, skips waiting for animations to finish.
 ```
 
 ## Demo
