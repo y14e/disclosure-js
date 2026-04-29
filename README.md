@@ -15,7 +15,7 @@ new Disclosure(root, options);
 
 ```
 
-### 🪄 Options
+## 🪄 Options
 
 ```ts
 interface DisclosureOptions {
@@ -24,6 +24,37 @@ interface DisclosureOptions {
     easing?: string;   // <easing-function> (default: 'ease')
   };
 }
+```
+
+## 📦 API
+
+### `open`
+
+```ts
+disclosure.open(details);
+// => void
+//
+// details: HTMLDetailsElement
+```
+
+### `close`
+
+```ts
+disclosure.close(details);
+// => void
+//
+// details: HTMLDetailsElement
+```
+
+### `destroy`
+
+Destroys the instance and cleans up all event listeners.
+
+```ts
+disclosure.destroy(force);
+// => Promise<void>
+//
+// force (optional): If true, skips waiting for animations to finish.
 ```
 
 ## Demo
