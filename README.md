@@ -21,7 +21,7 @@ new Disclosure(root, options);
 interface DisclosureOptions {
   animation?: {
     duration?: number; // ms (default: 300)
-    easing?: string; // <easing-function> (default: 'ease')
+    easing?: string;   // <easing-function> (default: 'ease')
   };
 }
 ```
