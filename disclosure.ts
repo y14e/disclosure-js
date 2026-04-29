@@ -80,7 +80,7 @@ export default class Disclosure {
     }
   }
 
-  async destroy(isForce = false): Promise<void> {
+  async destroy(force = false): Promise<void> {
     if (this.#isDestroyed || !this.#detailsElements || !this.#bindings) {
       return;
     }
@@ -119,7 +119,7 @@ export default class Disclosure {
       details.removeAttribute('data-disclosure-open');
     });
 
-    if (!isForce) {
+    if (!force) {
       const promises: Promise<void>[] = [];
 
       this.#detailsElements.forEach((details) => {
