@@ -7,7 +7,23 @@ A [disclosure](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/) pattern imp
 ```ts
 import Disclosure from './disclosure';
 
-const myDisclosure = new Disclosure(...);
+new Disclosure(root, options?);
+// => Disclosure
+//
+// root: HTMLElement
+// options?: DisclosureOptions
+
+```
+
+### DisclosureOptions
+
+```ts
+{
+  animation?: {
+    duration?: number;
+    easing?: string;
+  };
+}
 ```
 
 ## Demo
