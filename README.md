@@ -26,7 +26,7 @@ interface DisclosureOptions {
 }
 ```
 
-## 📦 API
+## 📦 APIs
 
 ### `open`
 
