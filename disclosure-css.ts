@@ -14,7 +14,7 @@ export default class Disclosure {
   #isDestroyed = false;
 
   constructor(root: HTMLElement) {
-    if (!root) {
+    if (!(root instanceof HTMLElement)) {
       throw new Error('Root element missing');
     }
 
@@ -36,13 +36,13 @@ export default class Disclosure {
   }
 
   open(details: HTMLDetailsElement): void {
-    if (!this.#isDestroyed && this.#bindings?.has(details)) {
+    if (details instanceof HTMLDetailsElement && !this.#isDestroyed && this.#bindings?.has(details)) {
       this.#toggle(details, true);
     }
   }
 
   close(details: HTMLDetailsElement): void {
-    if (!this.#isDestroyed && this.#bindings?.has(details)) {
+    if (details instanceof HTMLDetailsElement && !this.#isDestroyed && this.#bindings?.has(details)) {
       this.#toggle(details, false);
     }
   }
