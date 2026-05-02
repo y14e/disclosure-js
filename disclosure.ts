@@ -62,7 +62,7 @@ export default class Disclosure {
       this.#summaryElements.length === 0 ||
       this.#contentElements.length === 0
     ) {
-      throw new Error('Details, summary or content element missing');
+      throw new Error('Details, summary, or content element missing');
     }
 
     this.#initialize();
