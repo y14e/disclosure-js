@@ -81,7 +81,7 @@ export default class Disclosure {
   }
 
   async destroy(force = false): Promise<void> {
-    if (this.#isDestroyed || !this.#detailsElements || !this.#bindings) {
+    if (this.#isDestroyed || !this.#detailsElements) {
       return;
     }
 
@@ -144,13 +144,13 @@ export default class Disclosure {
   }
 
   #initialize() {
-    if (!this.#detailsElements || !this.#controller) {
+    if (!this.#controller) {
       return;
     }
 
     const { signal } = this.#controller;
 
-    this.#detailsElements.forEach((details, i) => {
+    this.#detailsElements?.forEach((details, i) => {
       const summary = this.#summaryElements?.[i];
       const content = this.#contentElements?.[i];
 
@@ -254,10 +254,6 @@ export default class Disclosure {
   };
 
   #toggle(details: HTMLDetailsElement, isOpen: boolean) {
-    if (!this.#detailsElements) {
-      return;
-    }
-
     const binding = this.#bindings?.get(details);
 
     if (!binding || isOpen === details.hasAttribute('data-disclosure-open')) {
@@ -267,7 +263,7 @@ export default class Disclosure {
     const name = details.getAttribute('data-disclosure-name');
 
     if (name && isOpen) {
-      const opened = this.#detailsElements.find(
+      const opened = this.#detailsElements?.find(
         (d) => d.hasAttribute('data-disclosure-open') && d.getAttribute('data-disclosure-name') === name,
       );
 
