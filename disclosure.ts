@@ -1,3 +1,17 @@
+/**
+ * disclosure.ts
+ *
+ * @version 1.0.0
+ * @author Yusuke Kamiyamane
+ * @license MIT
+ * @copyright Copyright (c) 2026 Yusuke Kamiyamane
+ * @see {@link https://github.com/y14e/disclosure-ts}
+ */
+
+// -----------------------------------------------------------------------------
+// [Types]
+// -----------------------------------------------------------------------------
+
 export interface DisclosureOptions {
   readonly animation?: {
     readonly duration?: number;
@@ -20,6 +34,10 @@ type Binding = {
   timer: number | undefined;
   animation: Animation | null;
 };
+
+// -----------------------------------------------------------------------------
+// [APIs]
+// -----------------------------------------------------------------------------
 
 export default class Disclosure {
   #rootElement: HTMLElement;
@@ -53,9 +71,21 @@ export default class Disclosure {
     }
 
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.#detailsElements = [...this.#rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`)];
-    this.#summaryElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`)];
-    this.#contentElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`)];
+    this.#detailsElements = [
+      ...this.#rootElement.querySelectorAll<HTMLDetailsElement>(
+        `details${NOT_NESTED}`,
+      ),
+    ];
+    this.#summaryElements = [
+      ...this.#rootElement.querySelectorAll<HTMLElement>(
+        `summary${NOT_NESTED}`,
+      ),
+    ];
+    this.#contentElements = [
+      ...this.#rootElement.querySelectorAll<HTMLElement>(
+        `summary${NOT_NESTED} + *`,
+      ),
+    ];
 
     if (
       this.#detailsElements.length === 0 ||
@@ -69,13 +99,21 @@ export default class Disclosure {
   }
 
   open(details: HTMLDetailsElement): void {
-    if (details instanceof HTMLDetailsElement && !this.#isDestroyed && this.#bindings?.has(details)) {
+    if (
+      details instanceof HTMLDetailsElement &&
+      !this.#isDestroyed &&
+      this.#bindings?.has(details)
+    ) {
       this.#toggle(details, true);
     }
   }
 
   close(details: HTMLDetailsElement): void {
-    if (details instanceof HTMLDetailsElement && !this.#isDestroyed && this.#bindings?.has(details)) {
+    if (
+      details instanceof HTMLDetailsElement &&
+      !this.#isDestroyed &&
+      this.#bindings?.has(details)
+    ) {
       this.#toggle(details, false);
     }
   }
@@ -264,7 +302,9 @@ export default class Disclosure {
 
     if (name && isOpen) {
       const opened = this.#detailsElements?.find(
-        (d) => d.hasAttribute('data-disclosure-open') && d.getAttribute('data-disclosure-name') === name,
+        (d) =>
+          d.hasAttribute('data-disclosure-open') &&
+          d.getAttribute('data-disclosure-name') === name,
       );
 
       if (opened) {
@@ -292,7 +332,10 @@ export default class Disclosure {
     });
     content.style.setProperty('overflow', 'clip');
     const { duration, easing } = this.#settings.animation;
-    const animation = content.animate({ blockSize: [`${startSize}px`, `${endSize}px`] }, { duration, easing });
+    const animation = content.animate(
+      { blockSize: [`${startSize}px`, `${endSize}px`] },
+      { duration, easing },
+    );
     binding.animation = animation;
 
     const cleanup = () => {
@@ -314,7 +357,10 @@ export default class Disclosure {
         cleanup();
 
         if (name) {
-          details.setAttribute('name', details.getAttribute('data-disclosure-name') ?? '');
+          details.setAttribute(
+            'name',
+            details.getAttribute('data-disclosure-name') ?? '',
+          );
         }
 
         if (!isOpen) {
@@ -329,7 +375,11 @@ export default class Disclosure {
     );
   }
 
-  #createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement) {
+  #createBinding(
+    details: HTMLDetailsElement,
+    summary: HTMLElement,
+    content: HTMLElement,
+  ) {
     return { details, summary, content, timer: undefined, animation: null };
   }
 

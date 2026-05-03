@@ -1,8 +1,26 @@
+/**
+ * disclosure-css.ts
+ *
+ * @version 1.0.0
+ * @author Yusuke Kamiyamane
+ * @license MIT
+ * @copyright Copyright (c) 2026 Yusuke Kamiyamane
+ * @see {@link https://github.com/y14e/disclosure-ts}
+ */
+
+// -----------------------------------------------------------------------------
+// [Types]
+// -----------------------------------------------------------------------------
+
 type Binding = {
   details: HTMLDetailsElement;
   summary: HTMLElement;
   content: HTMLElement;
 };
+
+// -----------------------------------------------------------------------------
+// [APIs]
+// -----------------------------------------------------------------------------
 
 export default class Disclosure {
   #rootElement: HTMLElement;
@@ -20,9 +38,21 @@ export default class Disclosure {
 
     this.#rootElement = root;
     const NOT_NESTED = ':not(:scope summary + * *)';
-    this.#detailsElements = [...this.#rootElement.querySelectorAll<HTMLDetailsElement>(`details${NOT_NESTED}`)];
-    this.#summaryElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED}`)];
-    this.#contentElements = [...this.#rootElement.querySelectorAll<HTMLElement>(`summary${NOT_NESTED} + *`)];
+    this.#detailsElements = [
+      ...this.#rootElement.querySelectorAll<HTMLDetailsElement>(
+        `details${NOT_NESTED}`,
+      ),
+    ];
+    this.#summaryElements = [
+      ...this.#rootElement.querySelectorAll<HTMLElement>(
+        `summary${NOT_NESTED}`,
+      ),
+    ];
+    this.#contentElements = [
+      ...this.#rootElement.querySelectorAll<HTMLElement>(
+        `summary${NOT_NESTED} + *`,
+      ),
+    ];
 
     if (
       this.#detailsElements.length === 0 ||
@@ -36,13 +66,21 @@ export default class Disclosure {
   }
 
   open(details: HTMLDetailsElement): void {
-    if (details instanceof HTMLDetailsElement && !this.#isDestroyed && this.#bindings?.has(details)) {
+    if (
+      details instanceof HTMLDetailsElement &&
+      !this.#isDestroyed &&
+      this.#bindings?.has(details)
+    ) {
       this.#toggle(details, true);
     }
   }
 
   close(details: HTMLDetailsElement): void {
-    if (details instanceof HTMLDetailsElement && !this.#isDestroyed && this.#bindings?.has(details)) {
+    if (
+      details instanceof HTMLDetailsElement &&
+      !this.#isDestroyed &&
+      this.#bindings?.has(details)
+    ) {
       this.#toggle(details, false);
     }
   }
@@ -143,7 +181,11 @@ export default class Disclosure {
     }
   }
 
-  #createBinding(details: HTMLDetailsElement, summary: HTMLElement, content: HTMLElement) {
+  #createBinding(
+    details: HTMLDetailsElement,
+    summary: HTMLElement,
+    content: HTMLElement,
+  ) {
     return { details, summary, content };
   }
 
