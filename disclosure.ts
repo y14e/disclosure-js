@@ -8,9 +8,9 @@
  * @see {@link https://github.com/y14e/disclosure-ts}
  */
 
-// -----------------------------------------------------------------------------
-// [Types]
-// -----------------------------------------------------------------------------
+// =============================================================================
+// Types
+// =============================================================================
 
 export interface DisclosureOptions {
   readonly animation?: {
@@ -35,9 +35,9 @@ type Binding = {
   animation: Animation | null;
 };
 
-// -----------------------------------------------------------------------------
-// [APIs]
-// -----------------------------------------------------------------------------
+// =============================================================================
+// APIs
+// =============================================================================
 
 export default class Disclosure {
   #rootElement: HTMLElement;
@@ -200,9 +200,9 @@ export default class Disclosure {
         details.setAttribute('data-disclosure-name', details.name);
       }
 
-      const sync = () => {
+      function sync() {
         details.toggleAttribute('data-disclosure-open', details.open);
-      };
+      }
 
       const observer = new MutationObserver(sync);
       observer.observe(details, { attributeFilter: ['open'] });
@@ -338,11 +338,11 @@ export default class Disclosure {
     );
     binding.animation = animation;
 
-    const cleanup = () => {
-      if (binding.animation === animation) {
+    function cleanup() {
+      if (binding?.animation === animation) {
         binding.animation = null;
       }
-    };
+    }
 
     if (!this.#controller) {
       return;
@@ -405,9 +405,9 @@ export default class Disclosure {
     }
 
     return new Promise<void>((resolve) => {
-      const done = () => {
+      function done() {
         resolve();
-      };
+      }
 
       animation.addEventListener('cancel', done, { once: true });
       animation.addEventListener('finish', done, { once: true });
