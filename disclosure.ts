@@ -1,7 +1,7 @@
 /**
  * disclosure.ts
  *
- * @version 1.0.0
+ * @version 1.0.1
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) 2026 Yusuke Kamiyamane
@@ -58,7 +58,7 @@ export default class Disclosure {
 
   constructor(root: HTMLElement, options: DisclosureOptions = {}) {
     if (!(root instanceof HTMLElement)) {
-      throw new Error('Root element missing');
+      throw new TypeError('Invalid root element');
     }
 
     this.#rootElement = root;
@@ -92,34 +92,47 @@ export default class Disclosure {
       this.#summaryElements.length === 0 ||
       this.#contentElements.length === 0
     ) {
-      throw new Error('Details, summary, or content element missing');
+      console.warn('Missing <details>, <summary>, or content element');
+      return;
     }
 
     this.#initialize();
   }
 
   open(details: HTMLDetailsElement): void {
-    if (
-      details instanceof HTMLDetailsElement &&
-      !this.#isDestroyed &&
-      this.#bindings?.has(details)
-    ) {
-      this.#toggle(details, true);
+    if (this.#isDestroyed) {
+      return;
     }
+
+    if (
+      !(details instanceof HTMLDetailsElement) ||
+      !this.#bindings?.has(details)
+    ) {
+      console.warn('Invalid <details> element');
+      return;
+    }
+
+    this.#toggle(details, true);
   }
 
   close(details: HTMLDetailsElement): void {
-    if (
-      details instanceof HTMLDetailsElement &&
-      !this.#isDestroyed &&
-      this.#bindings?.has(details)
-    ) {
-      this.#toggle(details, false);
+    if (this.#isDestroyed) {
+      return;
     }
+
+    if (
+      !(details instanceof HTMLDetailsElement) ||
+      !this.#bindings?.has(details)
+    ) {
+      console.warn('Invalid <details> element');
+      return;
+    }
+
+    this.#toggle(details, false);
   }
 
   async destroy(force = false): Promise<void> {
-    if (this.#isDestroyed || !this.#detailsElements) {
+    if (this.#isDestroyed) {
       return;
     }
 
@@ -135,13 +148,12 @@ export default class Disclosure {
       this.#observers = null;
     }
 
+    if (!this.#detailsElements) {
+      return;
+    }
+
     this.#detailsElements.forEach((details) => {
-      const binding = this.#bindings?.get(details);
-
-      if (!binding) {
-        return;
-      }
-
+      const binding = this.#bindings?.get(details) as Binding;
       const { timer } = binding;
 
       if (timer !== undefined) {
@@ -161,11 +173,11 @@ export default class Disclosure {
       const promises: Promise<void>[] = [];
 
       this.#detailsElements.forEach((details) => {
-        const animation = this.#bindings?.get(details)?.animation;
-
-        if (animation) {
-          promises.push(this.#waitAnimation(animation));
-        }
+        promises.push(
+          this.#waitAnimation(
+            this.#bindings?.get(details)?.animation as Animation,
+          ),
+        );
       });
 
       await Promise.allSettled(promises);
@@ -182,20 +194,9 @@ export default class Disclosure {
   }
 
   #initialize() {
-    if (!this.#controller) {
-      return;
-    }
-
-    const { signal } = this.#controller;
+    const { signal } = this.#controller as AbortController;
 
     this.#detailsElements?.forEach((details, i) => {
-      const summary = this.#summaryElements?.[i];
-      const content = this.#contentElements?.[i];
-
-      if (!summary || !content || !this.#bindings) {
-        return;
-      }
-
       if (details.name) {
         details.setAttribute('data-disclosure-name', details.name);
       }
@@ -208,6 +209,11 @@ export default class Disclosure {
       observer.observe(details, { attributeFilter: ['open'] });
       this.#observers?.push(observer);
       sync();
+      const summary = this.#summaryElements?.[i];
+
+      if (!summary) {
+        return;
+      }
 
       if (!this.#isFocusable(summary)) {
         summary.setAttribute('aria-disabled', 'true');
@@ -217,7 +223,18 @@ export default class Disclosure {
 
       summary.addEventListener('click', this.#onSummaryClick, { signal });
       summary.addEventListener('keydown', this.#onSummaryKeyDown, { signal });
+      const content = this.#contentElements?.[i];
+
+      if (!content) {
+        return;
+      }
+
       const binding = this.#createBinding(details, summary, content);
+
+      if (!this.#bindings) {
+        return;
+      }
+
       this.#bindings.set(details, binding);
       this.#bindings.set(summary, binding);
       this.#bindings.set(content, binding);
@@ -229,27 +246,13 @@ export default class Disclosure {
   #onSummaryClick = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    const summary = event.currentTarget;
-
-    if (!(summary instanceof HTMLElement)) {
-      return;
-    }
-
-    const binding = this.#bindings?.get(summary);
-
-    if (!binding) {
-      return;
-    }
-
-    const { details } = binding;
+    const { details } = this.#bindings?.get(
+      event.currentTarget as HTMLElement,
+    ) as Binding;
     this.#toggle(details, !details.hasAttribute('data-disclosure-open'));
   };
 
   #onSummaryKeyDown = (event: KeyboardEvent) => {
-    if (!this.#summaryElements) {
-      return;
-    }
-
     const { key } = event;
 
     if (!['End', 'Home', 'ArrowUp', 'ArrowDown'].includes(key)) {
@@ -259,17 +262,10 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
 
-    const focusables = this.#summaryElements.filter((summary) => {
-      const binding = this.#bindings?.get(summary);
-      return binding && this.#isFocusable(summary);
-    });
-
-    const active = this.#getActiveElement();
-
-    if (!active) {
-      return;
-    }
-
+    const focusables = (this.#summaryElements as HTMLElement[]).filter(
+      this.#isFocusable,
+    );
+    const active = this.#getActiveElement() as HTMLElement;
     const currentIndex = focusables.indexOf(active);
     let newIndex = currentIndex;
 
@@ -292,9 +288,7 @@ export default class Disclosure {
   };
 
   #toggle(details: HTMLDetailsElement, isOpen: boolean) {
-    const binding = this.#bindings?.get(details);
-
-    if (!binding || isOpen === details.hasAttribute('data-disclosure-open')) {
+    if (isOpen === details.hasAttribute('data-disclosure-open')) {
       return;
     }
 
@@ -312,6 +306,7 @@ export default class Disclosure {
       }
     }
 
+    const binding = this.#bindings?.get(details) as Binding;
     const { content, timer } = binding;
     const startSize = details.open ? content.offsetHeight : 0;
     binding.animation?.cancel();
@@ -344,11 +339,7 @@ export default class Disclosure {
       }
     }
 
-    if (!this.#controller) {
-      return;
-    }
-
-    const { signal } = this.#controller;
+    const { signal } = this.#controller as AbortController;
     animation.addEventListener('cancel', cleanup, { once: true, signal });
 
     animation.addEventListener(
