@@ -128,7 +128,7 @@ export default class Disclosure {
       const summary = this.#summaryElements?.[i];
 
       if (!summary) {
-        return;
+        throw new Error('Unreachable');
       }
 
       if (!this.#isFocusable(details)) {
@@ -141,13 +141,13 @@ export default class Disclosure {
       const content = this.#contentElements?.[i];
 
       if (!content) {
-        return;
+        throw new Error('Unreachable');
       }
 
       const binding = this.#createBinding(details, summary, content);
 
       if (!this.#bindings) {
-        return;
+        throw new Error('Unreachable');
       }
 
       this.#bindings.set(details, binding);
