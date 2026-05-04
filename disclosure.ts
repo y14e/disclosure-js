@@ -49,8 +49,8 @@ export default class Disclosure {
   };
   #settings: DeepRequired<DisclosureOptions>;
   #detailsElements: HTMLDetailsElement[] | null;
-  #summaryElements: HTMLElement[] | null;
-  #contentElements: HTMLElement[] | null;
+  #summaryElements!: HTMLElement[] | null;
+  #contentElements!: HTMLElement[] | null;
   #bindings: WeakMap<HTMLElement, Binding> | null = new WeakMap();
   #controller: AbortController | null = new AbortController();
   #observers: MutationObserver[] | null = [];
@@ -76,23 +76,31 @@ export default class Disclosure {
         `details${NOT_NESTED}`,
       ),
     ];
+
+    if (this.#detailsElements.length === 0) {
+      console.warn('Missing <details> elements');
+      return;
+    }
+
     this.#summaryElements = [
       ...this.#rootElement.querySelectorAll<HTMLElement>(
         `summary${NOT_NESTED}`,
       ),
     ];
+
+    if (this.#summaryElements.length === 0) {
+      console.warn('Missing <summary> elements');
+      return;
+    }
+
     this.#contentElements = [
       ...this.#rootElement.querySelectorAll<HTMLElement>(
         `summary${NOT_NESTED} + *`,
       ),
     ];
 
-    if (
-      this.#detailsElements.length === 0 ||
-      this.#summaryElements.length === 0 ||
-      this.#contentElements.length === 0
-    ) {
-      console.warn('Missing <details>, <summary>, or content element');
+    if (this.#contentElements.length === 0) {
+      console.warn('Missing content elements');
       return;
     }
 
