@@ -1,7 +1,7 @@
 /**
  * disclosure.ts
  *
- * @version 1.0.1
+ * @version 1.0.2
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -107,7 +107,7 @@ export default class Disclosure {
     this.#initialize();
   }
 
-  open(details: HTMLDetailsElement): void {
+  open(details: HTMLDetailsElement) {
     if (this.#isDestroyed) {
       return;
     }
@@ -123,7 +123,7 @@ export default class Disclosure {
     this.#toggle(details, true);
   }
 
-  close(details: HTMLDetailsElement): void {
+  close(details: HTMLDetailsElement) {
     if (this.#isDestroyed) {
       return;
     }
@@ -139,7 +139,7 @@ export default class Disclosure {
     this.#toggle(details, false);
   }
 
-  async destroy(force = false): Promise<void> {
+  async destroy(force = false) {
     if (this.#isDestroyed) {
       return;
     }
@@ -296,7 +296,7 @@ export default class Disclosure {
   };
 
   #toggle(details: HTMLDetailsElement, isOpen: boolean) {
-    if (isOpen === details.hasAttribute('data-disclosure-open')) {
+    if (details.hasAttribute('data-disclosure-open') === isOpen) {
       return;
     }
 
@@ -383,13 +383,16 @@ export default class Disclosure {
   }
 
   #getActiveElement() {
-    let active = document.activeElement;
+    function walk(node: Element | null): Element | null {
+      if (node === null) {
+        return null;
+      }
 
-    while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
-      active = active.shadowRoot.activeElement;
+      const active = node.shadowRoot?.activeElement;
+      return active ? walk(active) : node;
     }
 
-    return active instanceof HTMLElement ? active : null;
+    return walk(document.activeElement);
   }
 
   #isFocusable(element: HTMLElement) {
