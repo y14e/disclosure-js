@@ -44,7 +44,7 @@ export default class Disclosure {
       ),
     ];
 
-    if (this.#detailsElements.length === 0) {
+    if (!this.#detailsElements.length) {
       console.warn('Missing <details> elements');
       return;
     }
@@ -55,7 +55,7 @@ export default class Disclosure {
       ),
     ];
 
-    if (this.#summaryElements.length === 0) {
+    if (!this.#summaryElements.length) {
       console.warn('Missing <summary> elements');
       return;
     }
@@ -66,7 +66,7 @@ export default class Disclosure {
       ),
     ];
 
-    if (this.#contentElements.length === 0) {
+    if (!this.#contentElements.length) {
       console.warn('Missing content elements');
       return;
     }
