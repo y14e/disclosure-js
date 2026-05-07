@@ -1,7 +1,7 @@
 /**
  * disclosure.ts
  *
- * @version 1.0.5
+ * @version 1.0.6
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -145,8 +145,6 @@ export default class Disclosure {
     }
 
     this.#isDestroyed = true;
-    this.#controller?.abort();
-    this.#controller = null;
 
     if (this.#observers) {
       this.#observers.forEach((observer) => {
@@ -161,7 +159,12 @@ export default class Disclosure {
     }
 
     this.#detailsElements.forEach((details) => {
-      const binding = this.#bindings?.get(details) as Binding;
+      const binding = this.#bindings?.get(details);
+
+      if (!binding) {
+        throw new Error('Unreachable');
+      }
+
       const { timer } = binding;
 
       if (timer !== undefined) {
@@ -181,11 +184,11 @@ export default class Disclosure {
       const promises: Promise<void>[] = [];
 
       this.#detailsElements.forEach((details) => {
-        promises.push(
-          this.#waitAnimation(
-            this.#bindings?.get(details)?.animation as Animation,
-          ),
-        );
+        const animation = this.#bindings?.get(details)?.animation;
+
+        if (animation) {
+          promises.push(waitAnimation(animation));
+        }
       });
 
       await Promise.allSettled(promises);
@@ -195,6 +198,8 @@ export default class Disclosure {
       this.#bindings?.get(details)?.animation?.cancel();
     });
 
+    this.#controller?.abort();
+    this.#controller = null;
     this.#detailsElements = null;
     this.#summaryElements = null;
     this.#contentElements = null;
@@ -202,7 +207,11 @@ export default class Disclosure {
   }
 
   #initialize() {
-    const { signal } = this.#controller as AbortController;
+    if (!this.#controller) {
+      throw new Error('Unreachable');
+    }
+
+    const { signal } = this.#controller;
 
     this.#detailsElements?.forEach((details, i) => {
       if (details.name) {
@@ -223,7 +232,7 @@ export default class Disclosure {
         throw new Error('Unreachable');
       }
 
-      if (!this.#isFocusable(summary)) {
+      if (!isFocusable(summary)) {
         summary.setAttribute('aria-disabled', 'true');
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
@@ -237,7 +246,7 @@ export default class Disclosure {
         throw new Error('Unreachable');
       }
 
-      const binding = this.#createBinding(details, summary, content);
+      const binding = createBinding(details, summary, content);
 
       if (!this.#bindings) {
         throw new Error('Unreachable');
@@ -254,9 +263,24 @@ export default class Disclosure {
   #onSummaryClick = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    const { details } = this.#bindings?.get(
-      event.currentTarget as HTMLElement,
-    ) as Binding;
+
+    if (!this.#bindings) {
+      throw new Error('Unreachable');
+    }
+
+    const target = event.currentTarget;
+
+    if (!(target instanceof HTMLElement)) {
+      throw new Error('Unreachable');
+    }
+
+    const binding = this.#bindings.get(target);
+
+    if (!binding) {
+      throw new Error('Unreachable');
+    }
+
+    const { details } = binding;
     this.#toggle(details, !details.hasAttribute('data-disclosure-open'));
   };
 
@@ -270,10 +294,17 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
 
-    const focusables = (this.#summaryElements as HTMLElement[]).filter(
-      this.#isFocusable,
-    );
-    const active = this.#getActiveElement() as HTMLElement;
+    if (!this.#summaryElements) {
+      throw new Error('Unreachable');
+    }
+
+    const focusables = this.#summaryElements.filter(isFocusable);
+    const active = getActiveElement();
+
+    if (!(active instanceof HTMLElement)) {
+      throw new Error('Unreachable');
+    }
+
     const currentIndex = focusables.indexOf(active);
     let newIndex = currentIndex;
 
@@ -303,6 +334,7 @@ export default class Disclosure {
     const name = details.getAttribute('data-disclosure-name');
 
     if (name && isOpen) {
+      details.removeAttribute('name');
       const opened = this.#detailsElements?.find(
         (d) =>
           d.hasAttribute('data-disclosure-open') &&
@@ -314,7 +346,12 @@ export default class Disclosure {
       }
     }
 
-    const binding = this.#bindings?.get(details) as Binding;
+    const binding = this.#bindings?.get(details);
+
+    if (!binding) {
+      throw new Error('Unreachable');
+    }
+
     const { content, timer } = binding;
     const startSize = details.open ? content.offsetHeight : 0;
     binding.animation?.cancel();
@@ -324,6 +361,7 @@ export default class Disclosure {
     }
 
     const endSize = isOpen ? content.scrollHeight : 0;
+    binding.animation?.cancel();
 
     if (timer) {
       cancelAnimationFrame(timer);
@@ -347,7 +385,11 @@ export default class Disclosure {
       }
     }
 
-    const { signal } = this.#controller as AbortController;
+    if (!this.#controller) {
+      throw new Error('Unreachable');
+    }
+
+    const { signal } = this.#controller;
     animation.addEventListener('cancel', cleanup, { once: true, signal });
 
     animation.addEventListener(
@@ -373,44 +415,48 @@ export default class Disclosure {
       { once: true, signal },
     );
   }
+}
 
-  #createBinding(
-    details: HTMLDetailsElement,
-    summary: HTMLElement,
-    content: HTMLElement,
-  ) {
-    return { details, summary, content, timer: undefined, animation: null };
+// -----------------------------------------------------------------------------
+// Utils
+// -----------------------------------------------------------------------------
+
+function createBinding(
+  details: HTMLDetailsElement,
+  summary: HTMLElement,
+  content: HTMLElement,
+) {
+  return { details, summary, content, timer: undefined, animation: null };
+}
+
+function getActiveElement() {
+  let current = document.activeElement;
+
+  while (current?.shadowRoot?.activeElement) {
+    current = current.shadowRoot.activeElement;
   }
 
-  #getActiveElement() {
-    let current = document.activeElement;
+  return current;
+}
 
-    while (current?.shadowRoot?.activeElement) {
-      current = current.shadowRoot.activeElement;
+function isFocusable(element: HTMLElement) {
+  const index = element.getAttribute('tabindex');
+  return !index || Number(index) >= 0;
+}
+
+function waitAnimation(animation: Animation) {
+  const { playState } = animation;
+
+  if (playState === 'idle' || playState === 'finished') {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    function done() {
+      resolve();
     }
 
-    return current;
-  }
-
-  #isFocusable(element: HTMLElement) {
-    const index = element.getAttribute('tabindex');
-    return !index || Number(index) >= 0;
-  }
-
-  #waitAnimation(animation: Animation) {
-    const { playState } = animation;
-
-    if (playState === 'idle' || playState === 'finished') {
-      return Promise.resolve();
-    }
-
-    return new Promise<void>((resolve) => {
-      function done() {
-        resolve();
-      }
-
-      animation.addEventListener('cancel', done, { once: true });
-      animation.addEventListener('finish', done, { once: true });
-    });
-  }
+    animation.addEventListener('cancel', done, { once: true });
+    animation.addEventListener('finish', done, { once: true });
+  });
 }

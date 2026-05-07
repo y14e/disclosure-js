@@ -1,7 +1,7 @@
 /**
  * disclosure-css.ts
  *
- * @version 1.0.5
+ * @version 1.0.6
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -122,7 +122,11 @@ export default class Disclosure {
   }
 
   #initialize() {
-    const { signal } = this.#controller as AbortController;
+    if (!this.#controller) {
+      throw new Error('Unreachable');
+    }
+
+    const { signal } = this.#controller;
 
     this.#detailsElements?.forEach((details, i) => {
       const summary = this.#summaryElements?.[i];
@@ -131,7 +135,7 @@ export default class Disclosure {
         throw new Error('Unreachable');
       }
 
-      if (!this.#isFocusable(details)) {
+      if (!isFocusable(details)) {
         summary.setAttribute('aria-disabled', 'true');
         summary.setAttribute('tabindex', '-1');
         summary.style.setProperty('pointer-events', 'none');
@@ -144,7 +148,7 @@ export default class Disclosure {
         throw new Error('Unreachable');
       }
 
-      const binding = this.#createBinding(details, summary, content);
+      const binding = createBinding(details, summary, content);
 
       if (!this.#bindings) {
         throw new Error('Unreachable');
@@ -167,10 +171,18 @@ export default class Disclosure {
 
     event.preventDefault();
     event.stopPropagation();
-    const focusables = (this.#summaryElements as HTMLElement[]).filter(
-      this.#isFocusable,
-    );
-    const active = this.#getActiveElement() as HTMLElement;
+
+    if (!this.#summaryElements) {
+      throw new Error('Unreachable');
+    }
+
+    const focusables = this.#summaryElements.filter(isFocusable);
+    const active = getActiveElement();
+
+    if (!(active instanceof HTMLElement)) {
+      throw new Error('Unreachable');
+    }
+
     const currentIndex = focusables.indexOf(active);
     let newIndex = currentIndex;
 
@@ -197,27 +209,31 @@ export default class Disclosure {
       details.open = isOpen;
     }
   }
+}
 
-  #createBinding(
-    details: HTMLDetailsElement,
-    summary: HTMLElement,
-    content: HTMLElement,
-  ) {
-    return { details, summary, content };
+// -----------------------------------------------------------------------------
+// Utils
+// -----------------------------------------------------------------------------
+
+function createBinding(
+  details: HTMLDetailsElement,
+  summary: HTMLElement,
+  content: HTMLElement,
+) {
+  return { details, summary, content };
+}
+
+function getActiveElement() {
+  let current = document.activeElement;
+
+  while (current?.shadowRoot?.activeElement) {
+    current = current.shadowRoot.activeElement;
   }
 
-  #getActiveElement() {
-    let current = document.activeElement;
+  return current;
+}
 
-    while (current?.shadowRoot?.activeElement) {
-      current = current.shadowRoot.activeElement;
-    }
-
-    return current;
-  }
-
-  #isFocusable(element: HTMLElement) {
-    const index = element.getAttribute('tabindex');
-    return !index || Number(index) >= 0;
-  }
+function isFocusable(element: HTMLElement) {
+  const index = element.getAttribute('tabindex');
+  return !index || Number(index) >= 0;
 }
