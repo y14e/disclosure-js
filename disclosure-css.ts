@@ -218,6 +218,6 @@ export default class Disclosure {
 
   #isFocusable(element: HTMLElement) {
     const index = element.getAttribute('tabindex');
-    return index || Number(index) >= 0;
+    return !index || Number(index) >= 0;
   }
 }
