@@ -1,7 +1,7 @@
 /**
  * disclosure.ts
  *
- * @version 1.0.6
+ * @version 1.1.0
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -48,12 +48,13 @@ export default class Disclosure {
     },
   };
   #settings: DeepRequired<DisclosureOptions>;
-  #detailsElements: HTMLDetailsElement[] | null;
-  #summaryElements!: HTMLElement[] | null;
-  #contentElements!: HTMLElement[] | null;
-  #bindings: WeakMap<HTMLElement, Binding> | null = new WeakMap();
-  #controller: AbortController | null = new AbortController();
-  #observers: MutationObserver[] | null = [];
+  #detailsElements: HTMLDetailsElement[];
+  #summaryElements!: HTMLElement[];
+  #contentElements!: HTMLElement[];
+  #bindings = new WeakMap<HTMLElement, Binding>();
+  #eventController: AbortController | null = new AbortController();
+  #animationController: AbortController | null = new AbortController();
+  #observers: MutationObserver[] = [];
   #isDestroyed = false;
 
   constructor(root: HTMLElement, options: DisclosureOptions = {}) {
@@ -114,7 +115,7 @@ export default class Disclosure {
 
     if (
       !(details instanceof HTMLDetailsElement) ||
-      !this.#bindings?.has(details)
+      !this.#bindings.has(details)
     ) {
       console.warn('Invalid <details> element');
       return;
@@ -130,7 +131,7 @@ export default class Disclosure {
 
     if (
       !(details instanceof HTMLDetailsElement) ||
-      !this.#bindings?.has(details)
+      !this.#bindings.has(details)
     ) {
       console.warn('Invalid <details> element');
       return;
@@ -145,21 +146,17 @@ export default class Disclosure {
     }
 
     this.#isDestroyed = true;
+    this.#eventController?.abort();
+    this.#eventController = null;
 
-    if (this.#observers) {
-      this.#observers.forEach((observer) => {
-        observer.disconnect();
-      });
+    this.#observers.forEach((observer) => {
+      observer.disconnect();
+    });
 
-      this.#observers = null;
-    }
-
-    if (!this.#detailsElements) {
-      throw new Error('Unreachable');
-    }
+    this.#observers.length = 0;
 
     this.#detailsElements.forEach((details) => {
-      const binding = this.#bindings?.get(details);
+      const binding = this.#bindings.get(details);
 
       if (!binding) {
         throw new Error('Unreachable');
@@ -173,18 +170,11 @@ export default class Disclosure {
       }
     });
 
-    this.#rootElement.removeAttribute('data-disclosure-initialized');
-
-    this.#detailsElements.forEach((details) => {
-      details.removeAttribute('data-disclosure-name');
-      details.removeAttribute('data-disclosure-open');
-    });
-
     if (!force) {
       const promises: Promise<void>[] = [];
 
       this.#detailsElements.forEach((details) => {
-        const animation = this.#bindings?.get(details)?.animation;
+        const animation = this.#bindings.get(details)?.animation;
 
         if (animation) {
           promises.push(waitAnimation(animation));
@@ -195,25 +185,31 @@ export default class Disclosure {
     }
 
     this.#detailsElements.forEach((details) => {
-      this.#bindings?.get(details)?.animation?.cancel();
+      this.#bindings.get(details)?.animation?.cancel();
     });
 
-    this.#controller?.abort();
-    this.#controller = null;
-    this.#detailsElements = null;
-    this.#summaryElements = null;
-    this.#contentElements = null;
-    this.#bindings = null;
+    this.#animationController?.abort();
+    this.#animationController = null;
+
+    this.#detailsElements.forEach((details) => {
+      details.removeAttribute('data-disclosure-name');
+      details.removeAttribute('data-disclosure-open');
+    });
+
+    this.#detailsElements.length = 0;
+    this.#summaryElements.length = 0;
+    this.#contentElements.length = 0;
+    this.#rootElement.removeAttribute('data-disclosure-initialized');
   }
 
   #initialize() {
-    if (!this.#controller) {
+    if (!this.#eventController) {
       throw new Error('Unreachable');
     }
 
-    const { signal } = this.#controller;
+    const { signal } = this.#eventController;
 
-    this.#detailsElements?.forEach((details, i) => {
+    this.#detailsElements.forEach((details, i) => {
       if (details.name) {
         details.setAttribute('data-disclosure-name', details.name);
       }
@@ -224,9 +220,9 @@ export default class Disclosure {
 
       const observer = new MutationObserver(sync);
       observer.observe(details, { attributeFilter: ['open'] });
-      this.#observers?.push(observer);
+      this.#observers.push(observer);
       sync();
-      const summary = this.#summaryElements?.[i];
+      const summary = this.#summaryElements[i];
 
       if (!summary) {
         throw new Error('Unreachable');
@@ -240,18 +236,13 @@ export default class Disclosure {
 
       summary.addEventListener('click', this.#onSummaryClick, { signal });
       summary.addEventListener('keydown', this.#onSummaryKeyDown, { signal });
-      const content = this.#contentElements?.[i];
+      const content = this.#contentElements[i];
 
       if (!content) {
         throw new Error('Unreachable');
       }
 
       const binding = createBinding(details, summary, content);
-
-      if (!this.#bindings) {
-        throw new Error('Unreachable');
-      }
-
       this.#bindings.set(details, binding);
       this.#bindings.set(summary, binding);
       this.#bindings.set(content, binding);
@@ -263,11 +254,6 @@ export default class Disclosure {
   #onSummaryClick = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-
-    if (!this.#bindings) {
-      throw new Error('Unreachable');
-    }
-
     const target = event.currentTarget;
 
     if (!(target instanceof HTMLElement)) {
@@ -293,11 +279,6 @@ export default class Disclosure {
 
     event.preventDefault();
     event.stopPropagation();
-
-    if (!this.#summaryElements) {
-      throw new Error('Unreachable');
-    }
-
     const focusables = this.#summaryElements.filter(isFocusable);
     const active = getActiveElement();
 
@@ -335,7 +316,7 @@ export default class Disclosure {
 
     if (name && isOpen) {
       details.removeAttribute('name');
-      const opened = this.#detailsElements?.find(
+      const opened = this.#detailsElements.find(
         (d) =>
           d.hasAttribute('data-disclosure-open') &&
           d.getAttribute('data-disclosure-name') === name,
@@ -346,7 +327,7 @@ export default class Disclosure {
       }
     }
 
-    const binding = this.#bindings?.get(details);
+    const binding = this.#bindings.get(details);
 
     if (!binding) {
       throw new Error('Unreachable');
@@ -385,11 +366,11 @@ export default class Disclosure {
       }
     }
 
-    if (!this.#controller) {
+    if (!this.#animationController) {
       throw new Error('Unreachable');
     }
 
-    const { signal } = this.#controller;
+    const { signal } = this.#animationController;
     animation.addEventListener('cancel', cleanup, { once: true, signal });
 
     animation.addEventListener(
@@ -451,12 +432,7 @@ function waitAnimation(animation: Animation) {
     return Promise.resolve();
   }
 
-  return new Promise<void>((resolve) => {
-    function done() {
-      resolve();
-    }
-
-    animation.addEventListener('cancel', done, { once: true });
-    animation.addEventListener('finish', done, { once: true });
-  });
+  return new Promise<void>((resolve) =>
+    animation.addEventListener('finish', () => resolve(), { once: true }),
+  );
 }
