@@ -121,18 +121,10 @@ export default class Disclosure {
   }
 
   #initialize() {
-    if (!this.#controller) {
-      throw new Error('Unreachable');
-    }
-
-    const { signal } = this.#controller;
+    const { signal } = this.#controller as AbortController;
 
     this.#detailsElements.forEach((details, i) => {
-      const summary = this.#summaryElements[i];
-
-      if (!summary) {
-        throw new Error('Unreachable');
-      }
+      const summary = this.#summaryElements[i] as HTMLElement;
 
       if (!isFocusable(details)) {
         summary.setAttribute('aria-disabled', 'true');
@@ -141,18 +133,8 @@ export default class Disclosure {
       }
 
       summary.addEventListener('keydown', this.#onSummaryKeyDown, { signal });
-      const content = this.#contentElements[i];
-
-      if (!content) {
-        throw new Error('Unreachable');
-      }
-
+      const content = this.#contentElements[i] as HTMLElement;
       const binding = createBinding(details, summary, content);
-
-      if (!this.#bindings) {
-        throw new Error('Unreachable');
-      }
-
       this.#bindings.set(details, binding);
       this.#bindings.set(summary, binding);
       this.#bindings.set(content, binding);
@@ -171,12 +153,7 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const focusables = this.#summaryElements.filter(isFocusable);
-    const active = getActiveElement();
-
-    if (!(active instanceof HTMLElement)) {
-      throw new Error('Unreachable');
-    }
-
+    const active = getActiveElement() as HTMLElement;
     const currentIndex = focusables.indexOf(active);
     let newIndex = currentIndex;
 

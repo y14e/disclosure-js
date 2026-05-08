@@ -156,12 +156,7 @@ export default class Disclosure {
     this.#observers.length = 0;
 
     this.#detailsElements.forEach((details) => {
-      const binding = this.#bindings.get(details);
-
-      if (!binding) {
-        throw new Error('Unreachable');
-      }
-
+      const binding = this.#bindings.get(details) as Binding;
       const { timer } = binding;
 
       if (timer !== undefined) {
@@ -203,11 +198,7 @@ export default class Disclosure {
   }
 
   #initialize() {
-    if (!this.#eventController) {
-      throw new Error('Unreachable');
-    }
-
-    const { signal } = this.#eventController;
+    const { signal } = this.#eventController as AbortController;
 
     this.#detailsElements.forEach((details, i) => {
       if (details.name) {
@@ -222,11 +213,7 @@ export default class Disclosure {
       observer.observe(details, { attributeFilter: ['open'] });
       this.#observers.push(observer);
       sync();
-      const summary = this.#summaryElements[i];
-
-      if (!summary) {
-        throw new Error('Unreachable');
-      }
+      const summary = this.#summaryElements[i] as HTMLElement;
 
       if (!isFocusable(summary)) {
         summary.setAttribute('aria-disabled', 'true');
@@ -236,12 +223,7 @@ export default class Disclosure {
 
       summary.addEventListener('click', this.#onSummaryClick, { signal });
       summary.addEventListener('keydown', this.#onSummaryKeyDown, { signal });
-      const content = this.#contentElements[i];
-
-      if (!content) {
-        throw new Error('Unreachable');
-      }
-
+      const content = this.#contentElements[i] as HTMLElement;
       const binding = createBinding(details, summary, content);
       this.#bindings.set(details, binding);
       this.#bindings.set(summary, binding);
@@ -254,19 +236,9 @@ export default class Disclosure {
   #onSummaryClick = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    const target = event.currentTarget;
-
-    if (!(target instanceof HTMLElement)) {
-      throw new Error('Unreachable');
-    }
-
-    const binding = this.#bindings.get(target);
-
-    if (!binding) {
-      throw new Error('Unreachable');
-    }
-
-    const { details } = binding;
+    const { details } = this.#bindings.get(
+      event.currentTarget as HTMLElement,
+    ) as Binding;
     this.#toggle(details, !details.hasAttribute('data-disclosure-open'));
   };
 
@@ -280,12 +252,7 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const focusables = this.#summaryElements.filter(isFocusable);
-    const active = getActiveElement();
-
-    if (!(active instanceof HTMLElement)) {
-      throw new Error('Unreachable');
-    }
-
+    const active = getActiveElement() as HTMLElement;
     const currentIndex = focusables.indexOf(active);
     let newIndex = currentIndex;
 
@@ -327,12 +294,7 @@ export default class Disclosure {
       }
     }
 
-    const binding = this.#bindings.get(details);
-
-    if (!binding) {
-      throw new Error('Unreachable');
-    }
-
+    const binding = this.#bindings.get(details) as Binding;
     const { content, timer } = binding;
     const startSize = details.open ? content.offsetHeight : 0;
     binding.animation?.cancel();
@@ -366,11 +328,7 @@ export default class Disclosure {
       }
     }
 
-    if (!this.#animationController) {
-      throw new Error('Unreachable');
-    }
-
-    const { signal } = this.#animationController;
+    const { signal } = this.#animationController as AbortController;
     animation.addEventListener('cancel', cleanup, { once: true, signal });
 
     animation.addEventListener(
