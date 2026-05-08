@@ -1,7 +1,7 @@
 /**
  * disclosure.ts
  *
- * @version 1.0.6
+ * @version 1.1.0
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -52,7 +52,8 @@ export default class Disclosure {
   #summaryElements!: HTMLElement[] | null;
   #contentElements!: HTMLElement[] | null;
   #bindings: WeakMap<HTMLElement, Binding> | null = new WeakMap();
-  #controller: AbortController | null = new AbortController();
+  #eventController: AbortController | null = new AbortController();
+  #animationController: AbortController | null = new AbortController();
   #observers: MutationObserver[] | null = [];
   #isDestroyed = false;
 
@@ -145,6 +146,8 @@ export default class Disclosure {
     }
 
     this.#isDestroyed = true;
+    this.#eventController?.abort();
+    this.#eventController = null;
 
     if (this.#observers) {
       this.#observers.forEach((observer) => {
@@ -198,8 +201,8 @@ export default class Disclosure {
       this.#bindings?.get(details)?.animation?.cancel();
     });
 
-    this.#controller?.abort();
-    this.#controller = null;
+    this.#animationController?.abort();
+    this.#animationController = null;
     this.#detailsElements = null;
     this.#summaryElements = null;
     this.#contentElements = null;
@@ -211,7 +214,7 @@ export default class Disclosure {
       throw new Error('Unreachable');
     }
 
-    const { signal } = this.#controller;
+    const { signal } = this.#eventController;
 
     this.#detailsElements?.forEach((details, i) => {
       if (details.name) {
@@ -385,11 +388,11 @@ export default class Disclosure {
       }
     }
 
-    if (!this.#controller) {
+    if (!this.#animationController) {
       throw new Error('Unreachable');
     }
 
-    const { signal } = this.#controller;
+    const { signal } = this.#animationController;
     animation.addEventListener('cancel', cleanup, { once: true, signal });
 
     animation.addEventListener(
