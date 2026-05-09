@@ -379,8 +379,7 @@ function getActiveElement() {
 }
 
 function isFocusable(element: HTMLElement) {
-  const index = element.getAttribute('tabindex');
-  return !index || Number(index) >= 0;
+  return element.tabIndex >= 0;
 }
 
 function waitAnimation(animation: Animation) {
