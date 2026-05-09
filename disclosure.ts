@@ -252,7 +252,7 @@ export default class Disclosure {
     event.preventDefault();
     event.stopPropagation();
     const focusables = this.#summaryElements.filter(isFocusable);
-    const active = getActiveElement() as HTMLElement;
+    const active = getActiveElement();
     const currentIndex = focusables.indexOf(active);
     let newIndex = currentIndex;
 
@@ -375,7 +375,7 @@ function getActiveElement() {
     current = current.shadowRoot.activeElement;
   }
 
-  return current;
+  return current as HTMLElement;
 }
 
 function isFocusable(element: HTMLElement) {
