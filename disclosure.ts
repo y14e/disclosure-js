@@ -250,13 +250,13 @@ export default class Disclosure {
   #onSummaryClick = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    const target = event.currentTarget;
+    const summary = event.currentTarget;
 
-    if (!(target instanceof HTMLElement)) {
+    if (!(summary instanceof HTMLElement)) {
       return;
     }
 
-    const binding = this.#bindings.get(target);
+    const binding = this.#bindings.get(summary);
 
     if (!binding) {
       return;
