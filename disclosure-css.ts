@@ -28,7 +28,7 @@ export default class Disclosure {
   #summaryElements!: HTMLElement[];
   #contentElements!: HTMLElement[];
   #bindings = new WeakMap<HTMLElement, Binding>();
-  #controller: AbortController | null = new AbortController();
+  #controller: AbortController | null = null;
   #isDestroyed = false;
 
   constructor(root: HTMLElement) {
@@ -121,7 +121,8 @@ export default class Disclosure {
   }
 
   #initialize() {
-    const { signal } = this.#controller ?? new AbortController();
+    this.#controller = new AbortController();
+    const { signal } = this.#controller;
 
     this.#detailsElements.forEach((details, i) => {
       const summary = this.#summaryElements[i];
