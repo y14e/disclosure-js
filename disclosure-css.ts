@@ -121,10 +121,14 @@ export default class Disclosure {
   }
 
   #initialize() {
-    const { signal } = this.#controller as AbortController;
+    const { signal } = this.#controller ?? new AbortController();
 
     this.#detailsElements.forEach((details, i) => {
-      const summary = this.#summaryElements[i] as HTMLElement;
+      const summary = this.#summaryElements[i];
+
+      if (!summary) {
+        return;
+      }
 
       if (!isFocusable(details)) {
         summary.setAttribute('aria-disabled', 'true');
@@ -133,7 +137,12 @@ export default class Disclosure {
       }
 
       summary.addEventListener('keydown', this.#onSummaryKeyDown, { signal });
-      const content = this.#contentElements[i] as HTMLElement;
+      const content = this.#contentElements[i];
+
+      if (!content) {
+        return;
+      }
+
       const binding = createBinding(details, summary, content);
       this.#bindings.set(details, binding);
       this.#bindings.set(summary, binding);
@@ -154,6 +163,11 @@ export default class Disclosure {
     event.stopPropagation();
     const focusables = this.#summaryElements.filter(isFocusable);
     const active = getActiveElement();
+
+    if (!(active instanceof HTMLElement)) {
+      return;
+    }
+
     const currentIndex = focusables.indexOf(active);
     let newIndex = currentIndex;
 
@@ -201,7 +215,7 @@ function getActiveElement() {
     current = current.shadowRoot.activeElement;
   }
 
-  return current as HTMLElement;
+  return current;
 }
 
 function isFocusable(element: HTMLElement) {
