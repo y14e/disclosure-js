@@ -52,8 +52,8 @@ export default class Disclosure {
   #summaryElements!: HTMLElement[];
   #contentElements!: HTMLElement[];
   #bindings = new WeakMap<HTMLElement, Binding>();
-  #eventController: AbortController | null = null;
-  #animationController: AbortController | null = null;
+  #eventController: AbortController | null = new AbortController();
+  #animationController: AbortController | null = new AbortController();
   #observers: MutationObserver[] = [];
   #isDestroyed = false;
 
@@ -203,8 +203,7 @@ export default class Disclosure {
   }
 
   #initialize() {
-    this.#eventController = new AbortController();
-    const { signal } = this.#eventController;
+    const { signal } = this.#eventController ?? new AbortController();
 
     this.#detailsElements.forEach((details, i) => {
       if (details.name) {
@@ -363,8 +362,7 @@ export default class Disclosure {
       }
     }
 
-    this.#animationController = new AbortController();
-    const { signal } = this.#animationController;
+    const { signal } = this.#animationController ?? new AbortController();
     animation.addEventListener('cancel', cleanup, { once: true, signal });
 
     animation.addEventListener(
