@@ -170,12 +170,6 @@ export default class Disclosure {
 
     this.#animationController?.abort();
     this.#animationController = null;
-
-    this.#detailsElements.forEach((details) => {
-      details.removeAttribute('data-disclosure-name');
-      details.removeAttribute('data-disclosure-open');
-    });
-
     this.#detailsElements.length = 0;
     this.#summaryElements.length = 0;
     this.#contentElements.length = 0;
@@ -355,7 +349,10 @@ export default class Disclosure {
     );
   }
 
-  #mergeOptions(target: DeepRequired<DisclosureOptions>, source: DisclosureOptions) {
+  #mergeOptions(
+    target: DeepRequired<DisclosureOptions>,
+    source: DisclosureOptions,
+  ) {
     return {
       animation: { ...target.animation, ...(source.animation ?? {}) },
     };
@@ -372,9 +369,12 @@ export default class Disclosure {
 
     if (name) {
       details.setAttribute('name', name);
+      details.removeAttribute('data-disclosure-name');
     }
 
-    if (!details.hasAttribute('data-disclosure-open')) {
+    if (details.hasAttribute('data-disclosure-open')) {
+      details.removeAttribute('data-disclosure-open');
+    } else {
       details.open = false;
     }
 
