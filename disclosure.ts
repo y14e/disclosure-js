@@ -65,15 +65,8 @@ export default class Disclosure {
     }
 
     this.#rootElement = root;
-    this.#defaults = {
-      animation: {
-        ...this.#defaults.animation,
-        ...(Disclosure.defaults.animation ?? {}),
-      },
-    };
-    this.#settings = {
-      animation: { ...this.#defaults.animation, ...(options.animation ?? {}) },
-    };
+    this.#defaults = this.#mergeOptions(this.#defaults, Disclosure.defaults);
+    this.#settings = this.#mergeOptions(this.#defaults, options);
 
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
       Object.assign(this.#settings.animation, { duration: 0 });
@@ -360,6 +353,12 @@ export default class Disclosure {
       },
       { once: true, signal },
     );
+  }
+
+  #mergeOptions(target: DeepRequired<DisclosureOptions>, source: DisclosureOptions) {
+    return {
+      animation: { ...target.animation, ...(source.animation ?? {}) },
+    };
   }
 
   #onAnimationFinish(content: HTMLElement) {
