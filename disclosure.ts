@@ -1,7 +1,7 @@
 /**
  * disclosure.ts
  *
- * @version 1.1.1
+ * @version 1.2.0
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -40,6 +40,8 @@ type Binding = {
 // -----------------------------------------------------------------------------
 
 export default class Disclosure {
+  static defaults: DisclosureOptions;
+
   #rootElement: HTMLElement;
   #defaults = {
     animation: {
@@ -63,6 +65,12 @@ export default class Disclosure {
     }
 
     this.#rootElement = root;
+    this.#defaults = {
+      animation: {
+        ...this.#defaults.animation,
+        ...(Disclosure.defaults.animation ?? {}),
+      },
+    };
     this.#settings = {
       animation: { ...this.#defaults.animation, ...(options.animation ?? {}) },
     };
@@ -155,37 +163,16 @@ export default class Disclosure {
 
     this.#observers.length = 0;
 
-    this.#detailsElements.forEach((details) => {
-      const binding = this.#bindings.get(details);
-
-      if (!binding) {
-        return;
-      }
-
-      const { timer } = binding;
-
-      if (timer !== undefined) {
-        cancelAnimationFrame(timer);
-        binding.timer = undefined;
-      }
-    });
-
     if (!force) {
-      const promises: Promise<void>[] = [];
-
-      this.#detailsElements.forEach((details) => {
-        const animation = this.#bindings.get(details)?.animation;
-
-        if (animation) {
-          promises.push(waitAnimation(animation));
-        }
-      });
-
-      await Promise.allSettled(promises);
+      await this.#waitAnimationsFinish();
     }
 
-    this.#detailsElements.forEach((details) => {
-      this.#bindings.get(details)?.animation?.cancel();
+    this.#contentElements.forEach((content) => {
+      if (force) {
+        this.#bindings.get(content)?.animation?.finish();
+      }
+
+      this.#onAnimationFinish(content);
     });
 
     this.#animationController?.abort();
@@ -368,25 +355,47 @@ export default class Disclosure {
     animation.addEventListener(
       'finish',
       () => {
+        this.#onAnimationFinish(content);
         cleanup();
-
-        if (name) {
-          details.setAttribute(
-            'name',
-            details.getAttribute('data-disclosure-name') ?? '',
-          );
-        }
-
-        if (!isOpen) {
-          details.open = false;
-        }
-
-        const { style } = content;
-        style.removeProperty('block-size');
-        style.removeProperty('overflow');
       },
       { once: true, signal },
     );
+  }
+
+  #onAnimationFinish(content: HTMLElement) {
+    const details = this.#bindings.get(content)?.details;
+
+    if (!details) {
+      return;
+    }
+
+    const name = details.getAttribute('data-disclosure-name');
+
+    if (name) {
+      details.setAttribute('name', name);
+    }
+
+    if (!details.hasAttribute('data-disclosure-open')) {
+      details.open = false;
+    }
+
+    const { style } = content;
+    style.removeProperty('block-size');
+    style.removeProperty('overflow');
+  }
+
+  async #waitAnimationsFinish() {
+    const promises: Promise<void>[] = [];
+
+    this.#contentElements.forEach((content) => {
+      const animation = this.#bindings.get(content)?.animation;
+
+      if (animation) {
+        promises.push(waitAnimationFinish(animation));
+      }
+    });
+
+    await Promise.allSettled(promises);
   }
 }
 
@@ -416,7 +425,7 @@ function isFocusable(element: HTMLElement) {
   return element.tabIndex >= 0;
 }
 
-function waitAnimation(animation: Animation) {
+function waitAnimationFinish(animation: Animation) {
   const { playState } = animation;
 
   if (playState === 'idle' || playState === 'finished') {
