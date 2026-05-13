@@ -40,7 +40,7 @@ type Binding = {
 // -----------------------------------------------------------------------------
 
 export default class Disclosure {
-  static defaults: DisclosureOptions;
+  static defaults: DisclosureOptions = {};
 
   #rootElement: HTMLElement;
   #defaults = {
