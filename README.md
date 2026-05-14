@@ -28,15 +28,14 @@ interface DisclosureOptions {
 
 ### ⚙️ Customize defaults
 
-Override the global default settings applied to all disclosure instances. Useful for changing animation behavior across your project without repeating the same options every time.
+Override the global default settings applied to all disclosure instances.
 
 ```ts
 import Disclosure from './disclosure';
 
 Disclosure.defaults = {
   animation: {
-    duration: 3000,
-    easing: 'linear',
+    duration: 1000,
   },
 };
 
