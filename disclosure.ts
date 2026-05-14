@@ -184,6 +184,12 @@ export default class Disclosure {
 
     this.#animationController?.abort();
     this.#animationController = null;
+
+    this.#detailsElements.forEach((details) => {
+      details.removeAttribute('data-disclosure-name');
+      details.removeAttribute('data-disclosure-open');
+    });
+
     this.#detailsElements.length = 0;
     this.#summaryElements.length = 0;
     this.#contentElements.length = 0;
@@ -382,12 +388,7 @@ export default class Disclosure {
       details.removeAttribute('data-disclosure-name');
     }
 
-    if (details.hasAttribute('data-disclosure-open')) {
-      binding.timer = requestAnimationFrame(() => {
-        binding.timer = undefined;
-        details.removeAttribute('data-disclosure-open');
-      });
-    } else {
+    if (!details.hasAttribute('data-disclosure-open')) {
       details.open = false;
     }
 
