@@ -294,7 +294,7 @@ export default class Disclosure {
 
     const name = details.getAttribute('data-disclosure-name');
 
-    if (name) {
+    if (name && isOpen) {
       details.removeAttribute('name');
       const opened = this.#detailsElements.find(
         (d) =>
@@ -302,7 +302,7 @@ export default class Disclosure {
           d.getAttribute('data-disclosure-name') === name,
       );
 
-      if (isOpen && opened && opened !== details) {
+      if (opened) {
         this.close(opened);
       }
     }
