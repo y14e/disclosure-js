@@ -1,7 +1,7 @@
 /**
  * disclosure.ts
  *
- * @version 1.2.1
+ * @version 1.2.2
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -67,11 +67,8 @@ export default class Disclosure {
     this.#rootElement = root;
     this.#defaults = this.#mergeOptions(this.#defaults, Disclosure.defaults);
     this.#settings = this.#mergeOptions(this.#defaults, options);
-
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    matchMedia('(prefers-reduced-motion: reduce)').matches &&
       Object.assign(this.#settings.animation, { duration: 0 });
-    }
-
     const NOT_NESTED = ':not(:scope summary + * *)';
     this.#detailsElements = [
       ...this.#rootElement.querySelectorAll<HTMLDetailsElement>(
@@ -169,16 +166,10 @@ export default class Disclosure {
     });
 
     this.#observers.length = 0;
-
-    if (!force) {
-      await this.#waitAnimationsFinish();
-    }
+    !force && (await this.#waitAnimationsFinish());
 
     this.#contentElements.forEach((content) => {
-      if (force) {
-        this.#bindings.get(content)?.animation?.finish();
-      }
-
+      force && this.#bindings.get(content)?.animation?.finish();
       this.#onAnimationFinish(content);
     });
 
@@ -200,9 +191,8 @@ export default class Disclosure {
     const { signal } = this.#eventController ?? new AbortController();
 
     this.#detailsElements.forEach((details, i) => {
-      if (details.name) {
+      details.name &&
         details.setAttribute('data-disclosure-name', details.name);
-      }
 
       function sync() {
         details.toggleAttribute('data-disclosure-open', details.open);
@@ -301,10 +291,7 @@ export default class Disclosure {
           d.hasAttribute('data-disclosure-open') &&
           d.getAttribute('data-disclosure-name') === name,
       );
-
-      if (opened) {
-        this.close(opened);
-      }
+      opened && this.close(opened);
     }
 
     const binding = this.#bindings.get(details);
@@ -323,11 +310,7 @@ export default class Disclosure {
 
     const endSize = isOpen ? content.scrollHeight : 0;
     binding.animation?.cancel();
-
-    if (timer) {
-      cancelAnimationFrame(timer);
-    }
-
+    timer && cancelAnimationFrame(timer);
     binding.timer = requestAnimationFrame(() => {
       binding.timer = undefined;
       details.toggleAttribute('data-disclosure-open', isOpen);
@@ -382,10 +365,7 @@ export default class Disclosure {
     }
 
     const name = details.getAttribute('data-disclosure-name');
-
-    if (name) {
-      details.setAttribute('name', name);
-    }
+    name && details.setAttribute('name', name);
 
     if (!details.hasAttribute('data-disclosure-open')) {
       details.open = false;
@@ -401,10 +381,7 @@ export default class Disclosure {
 
     this.#contentElements.forEach((content) => {
       const animation = this.#bindings.get(content)?.animation;
-
-      if (animation) {
-        promises.push(waitAnimationFinish(animation));
-      }
+      animation && promises.push(waitAnimationFinish(animation));
     });
 
     await Promise.allSettled(promises);
