@@ -1,7 +1,7 @@
 /**
  * disclosure.ts
  *
- * @version 1.2.2
+ * @version 1.2.3
  * @author Yusuke Kamiyamane
  * @license MIT
  * @copyright Copyright (c) Yusuke Kamiyamane
@@ -54,8 +54,8 @@ export default class Disclosure {
   #summaryElements!: HTMLElement[];
   #contentElements!: HTMLElement[];
   #bindings = new WeakMap<HTMLElement, Binding>();
-  #eventController: AbortController | null = new AbortController();
-  #animationController: AbortController | null = new AbortController();
+  #eventController: AbortController | null = null;
+  #animationController: AbortController | null = null;
   #observers: MutationObserver[] = [];
   #isDestroyed = false;
 
@@ -188,7 +188,8 @@ export default class Disclosure {
   }
 
   #initialize() {
-    const { signal } = this.#eventController ?? new AbortController();
+    this.#eventController = new AbortController();
+    const { signal } = this.#eventController;
 
     this.#detailsElements.forEach((details, i) => {
       details.name &&
@@ -329,7 +330,8 @@ export default class Disclosure {
       }
     }
 
-    const { signal } = this.#animationController ?? new AbortController();
+    this.#animationController = new AbortController();
+    const { signal } = this.#animationController;
     animation.addEventListener('cancel', cleanup, { once: true, signal });
 
     animation.addEventListener(
